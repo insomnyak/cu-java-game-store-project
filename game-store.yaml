@@ -1,0 +1,384 @@
+openapi: 3.0.0
+info:
+  title: Game Store
+  description: Rene Serulle U1 Capstone. This is a REST Inventory Management Web Service for a Video Game Store
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:8080'
+    description: local dev server
+
+paths:
+  /itemType:
+    get:
+      summary: returns all available item types
+      responses:
+        '200':
+          description: List of all item types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemTypes'
+  /item/{type}:
+    get:
+      summary: returns all items of the specified type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of all games
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Items'
+
+  /item/{type}/{id}:
+    get:
+      summary: returns item with specified type and id
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          description: The id of the item
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: the item with specified type and id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+
+  /item/{type}/attributes:
+    get:
+      summary: returns all available attributes for the item of specified type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of all item types
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attributes'
+
+  /item/{type}/{attribute}/{value}:
+    get:
+      summary: returns item with specified type and id
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
+        - name: attribute
+          in: path
+          required: true
+          description: the name of the attribute (or property, or column name) to search in
+          schema:
+            type: string
+        - name: value
+          in: path
+          required: true
+          description: The value of the attribute
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the item with specified type and id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+
+  /item/inventory{type}:
+    post:
+      summary: adds items of the specified type
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Items'
+      responses:
+        '201':
+          description: game added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Items'
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+    put:
+      summary: updates an existing game(s)
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Items'
+      responses:
+        '204':
+          description: the item was successfully updated
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+
+  /item/inventory/{type}/{id}:
+    delete:
+      summary: deletes an item from the DB of specified type and id
+      parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          description: The id of the item
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: delete successful
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+
+  /purchase:
+    post:
+      summary: user is able to purchase items in inventory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Purchase'
+      responses:
+        '201':
+          description: t-shirt(s) added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        gameId:
+          type: integer
+          maxLength: 11
+        title:
+          type: string
+          maxLength: 50
+        esrbRating:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 255
+        studio:
+          type: string
+          maxLength: 50
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        price:
+          type: number
+          format: '#####.##'
+      required:
+        - title
+        - esrbRating
+        - description
+        - studio
+        - price
+        - quantity
+    Console:
+      type: object
+      properties:
+        consoledId:
+          type: integer
+          maxLength: 11
+        model:
+          type: string
+        manufacturer:
+          type: string
+        memoryAmount:
+          type: string
+        processor:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        price:
+          type: number
+          format: '#####.##'
+      required:
+        - model
+        - manufacturer
+        - price
+        - quantity
+    TShirt:
+      type: object
+      properties:
+        tShirtId:
+          type: integer
+          maxLength: 11
+        size:
+          type: string
+        color:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        price:
+          type: number
+          format: '#####.##'
+      required:
+        - size
+        - color
+        - description
+        - price
+        - quantity
+    Item:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/Game'
+        - $ref: '#/components/schemas/Console'
+        - $ref: '#/components/schemas/TShirt'
+    Items:
+      type: array
+      items:
+        $ref: '#/components/schemas/Item'
+    ItemTypes:
+      type: array
+      items:
+        type: string
+    Attributes:
+      type: array
+      items:
+        type: string
+    Purchase:
+      type: object
+      properties:
+        invoiceId:
+          type: integer
+          maxLength: 11
+        name:
+          type: string
+          maxLength: 80
+        street:
+          type: string
+          maxLength: 30
+        city:
+          type: string
+          maxLength: 30
+        state:
+          type: string
+          maxLength: 30
+        zipcode:
+          type: string
+          maxLength: 5
+        item:
+          $ref: '#/components/schemas/Item'
+        itemType:
+          type: string
+          maxLength: 20
+        itemId:
+          type: integer
+          maxLength: 11
+        unitPrice:
+          type: number
+          format: '#####.##'
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        subtotal:
+          type: number
+          format: '#####.##'
+        tax:
+          type: number
+          format: '#####.##'
+        processingFee:
+          type: number
+          format: '#####.##'
+        total:
+          type: number
+          format: '#####.##'
+      required:
+        - name
+        - street
+        - city
+        - state
+        - zipcode
+        - itemType
+        - itemId
+        - quantity
+

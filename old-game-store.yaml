@@ -1,0 +1,733 @@
+openapi: 3.0.0
+info:
+  title: Game Store
+  description: Rene Serulle U1 Capstone. This is a REST Inventory Management Web Service for a Video Game Store
+  version: 0.0.1
+servers:
+  - url: 'http://localhost:8080'
+    description: local dev server
+paths:
+  /game:
+    get:
+      summary: returns all games
+      responses:
+        '200':
+          description: List of all games
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Games'
+    post:
+      summary: adds a game
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Games'
+      responses:
+        '201':
+          description: game added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Games'
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+    put:
+      summary: updates an existing game(s)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Games'
+      responses:
+        '200':
+          description: successfully updated
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+
+  /game/{id}:
+    get:
+      summary: returns game with specified id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the game
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: the game with specified id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+    delete:
+      summary: deletes a game from the DB
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the game
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: delete successfull
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+
+  /game/esrb/{rating}:
+    get:
+      summary: returns a list of games with specified esrb rating
+      parameters:
+        - name: rating
+          in: path
+          required: true
+          description: The rating to search for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the game with specified esrb rating
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Games'
+        '400':
+          description: Bad Request
+        '404':
+          description: games not found
+  /game/studio/{name}:
+    get:
+      summary: returns a list of games with specified studio name
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The studio to search for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the game with specified studio name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Games'
+        '400':
+          description: Bad Request
+        '404':
+          description: games not found
+  /game/title/{title}:
+    get:
+      summary: returns a list of games with specified title
+      parameters:
+        - name: title
+          in: path
+          required: true
+          description: The title to search for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the game with specified title
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Games'
+        '400':
+          description: Bad Request
+        '404':
+          description: games not found
+
+  /console:
+    get:
+      summary: returns all consoles
+      responses:
+        '200':
+          description: List of all consoles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consoles'
+    post:
+      summary: adds a console(s)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Consoles'
+      responses:
+        '201':
+          description: console(s) added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consoles'
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+    put:
+      summary: updates an existing console(s)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Consoles'
+      responses:
+        '200':
+          description: successfully updated
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+
+  /console/{id}:
+    get:
+      summary: returns console with specified id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the console
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: the console with specified id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Console'
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+    delete:
+      summary: deletes a console from the DB
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the console
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: delete successfull
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+
+  /console/manufacturer/{name}:
+    get:
+      summary: returns a list of consoles with specified manufacturer name
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The manufacturer name to search for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the console(s) with specified manufacturer name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Consoles'
+        '400':
+          description: Bad Request
+        '404':
+          description: consoles not found
+
+  /tshirt:
+    get:
+      summary: returns all t-shirts
+      responses:
+        '200':
+          description: List of all t-shirts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TShirts'
+    post:
+      summary: adds a t-shirt(s)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TShirts'
+      responses:
+        '201':
+          description: t-shirt(s) added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TShirts'
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+    put:
+      summary: updates an existing t-shirt(s)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TShirts'
+      responses:
+        '200':
+          description: successfully updated
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+
+  /tshirt/{id}:
+    get:
+      summary: returns t-shirt with specified id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the t-shirt
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: the console with specified id
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TShirt'
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+    delete:
+      summary: deletes a t-shirt from the DB
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The id of the t-shirt
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: delete successfull
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+
+  /tshirt/color/{color}:
+    get:
+      summary: returns a list of t-shirts with specified color
+      parameters:
+        - name: color
+          in: path
+          required: true
+          description: The color to search for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the t-shirt(s) with specified color
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TShirts'
+        '400':
+          description: Bad Request
+        '404':
+          description: t-shirts not found
+
+  /tshirt/size/{size}:
+    get:
+      summary: returns a list of t-shirts with specified size
+      parameters:
+        - name: size
+          in: path
+          required: true
+          description: The color to search for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the t-shirt(s) with specified size
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TShirts'
+        '400':
+          description: Bad Request
+        '404':
+          description: t-shirts not found
+
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        gameId:
+          type: integer
+          maxLength: 11
+        title:
+          type: string
+          maxLength: 50
+        esrbRating:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+          maxLength: 255
+        studio:
+          type: string
+          maxLength: 50
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        price:
+          type: number
+          format: '#####.##'
+      required:
+        - title
+        - esrbRating
+        - description
+        - studio
+        - price
+        - quantity
+    Console:
+      type: object
+      properties:
+        consoledId:
+          type: integer
+          maxLength: 11
+        model:
+          type: string
+        manufacturer:
+          type: string
+        memoryAmount:
+          type: string
+        processor:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        price:
+          type: number
+          format: '#####.##'
+      required:
+        - model
+        - manufacturer
+        - price
+        - quantity
+    TShirt:
+      type: object
+      properties:
+        tShirtId:
+          type: integer
+          maxLength: 11
+        size:
+          type: string
+        color:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        price:
+          type: number
+          format: '#####.##'
+      required:
+        - size
+        - color
+        - description
+        - price
+        - quantity
+    Games:
+      type: array
+      items:
+        $ref: '#/components/schemas/Game'
+    Consoles:
+      type: array
+      items:
+        $ref: '#/components/schemas/Console'
+    TShirts:
+      type: array
+      items:
+        $ref: '#/components/schemas/TShirt'
+    Invoice:
+      type: object
+      properties:
+        invoiceId:
+          type: integer
+          maxLength: 11
+        name:
+          type: string
+          maxLength: 80
+        street:
+          type: string
+          maxLength: 30
+        city:
+          type: string
+          maxLength: 30
+        state:
+          type: string
+          maxLength: 30
+        zipcode:
+          type: string
+          maxLength: 5
+        itemType:
+          type: string
+          maxLength: 20
+        itemId:
+          type: integer
+          maxLength: 11
+        unitPrice:
+          type: number
+          format: '#####.##'
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        subtotal:
+          type: number
+          format: '#####.##'
+        tax:
+          type: number
+          format: '#####.##'
+        processingFee:
+          type: number
+          format: '#####.##'
+        total:
+          type: number
+          format: '#####.##'
+      required:
+        - name
+        - street
+        - city
+        - state
+        - zipcode
+        - itemType
+        - itemId
+        - quantity
+    PurchaseGame:
+      type: object
+      properties:
+        invoiceId:
+          type: integer
+          maxLength: 11
+        name:
+          type: string
+          maxLength: 80
+        street:
+          type: string
+          maxLength: 30
+        city:
+          type: string
+          maxLength: 30
+        state:
+          type: string
+          maxLength: 30
+        zipcode:
+          type: string
+          maxLength: 5
+        itemType:
+          type: string
+          maxLength: 20
+        itemId:
+          type: integer
+          maxLength: 11
+        unitPrice:
+          type: number
+          format: '#####.##'
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        subtotal:
+          type: number
+          format: '#####.##'
+        tax:
+          type: number
+          format: '#####.##'
+        processingFee:
+          type: number
+          format: '#####.##'
+        total:
+          type: number
+          format: '#####.##'
+        item:
+          $ref: '#/components/schemas/Game'
+    PurchaseConsole:
+      type: object
+      properties:
+        invoiceId:
+          type: integer
+          maxLength: 11
+        name:
+          type: string
+          maxLength: 80
+        street:
+          type: string
+          maxLength: 30
+        city:
+          type: string
+          maxLength: 30
+        state:
+          type: string
+          maxLength: 30
+        zipcode:
+          type: string
+          maxLength: 5
+        itemType:
+          type: string
+          maxLength: 20
+        itemId:
+          type: integer
+          maxLength: 11
+        unitPrice:
+          type: number
+          format: '#####.##'
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        subtotal:
+          type: number
+          format: '#####.##'
+        tax:
+          type: number
+          format: '#####.##'
+        processingFee:
+          type: number
+          format: '#####.##'
+        total:
+          type: number
+          format: '#####.##'
+        item:
+          $ref: '#/components/schemas/Console'
+    PurchaseTShirt:
+      type: object
+      properties:
+        invoiceId:
+          type: integer
+          maxLength: 11
+        name:
+          type: string
+          maxLength: 80
+        street:
+          type: string
+          maxLength: 30
+        city:
+          type: string
+          maxLength: 30
+        state:
+          type: string
+          maxLength: 30
+        zipcode:
+          type: string
+          maxLength: 5
+        itemType:
+          type: string
+          maxLength: 20
+        itemId:
+          type: integer
+          maxLength: 11
+        unitPrice:
+          type: number
+          format: '#####.##'
+        quantity:
+          type: integer
+          minimum: 1
+          maxLength: 11
+        subtotal:
+          type: number
+          format: '#####.##'
+        tax:
+          type: number
+          format: '#####.##'
+        processingFee:
+          type: number
+          format: '#####.##'
+        total:
+          type: number
+          format: '#####.##'
+        item:
+          $ref: '#/components/schemas/TShirt'
+
