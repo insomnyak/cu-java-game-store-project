@@ -6,12 +6,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-public interface GameDao {
+public interface GameDao extends ItemDao<Game> {
     // CRUD
+
+    @Override
     Game add(Game game);
+
+    @Override
     Game find(Long gameId);
+
+    @Override
     List<Game> findAll();
+
+    @Override
     void update(Game game);
+
+    @Override
     void delete(Long gameId);
 
     List<Game> findAllByStudio(String studio);
