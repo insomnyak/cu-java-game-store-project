@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class TShirt {
+public class TShirt extends Item {
 
     @Digits(integer = 11, fraction = 0, message = "Invalid quantity. Must be a whole number up to 11 digits long.")
     private Long tShirtId;
@@ -23,15 +23,6 @@ public class TShirt {
     @NotBlank(message = "Invalid description: cannot be empty or blank.")
     @Size(max = 255, message = "Invalid description: must not be longer than 255 characters.")
     private String description;
-
-    @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid price. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
-    private BigDecimal price;
-
-    @NotNull
-    @Digits(integer = 11, fraction = 0, message = "Invalid quantity. Must be a whole number up to 11 digits long.")
-    private Long quantity;
 
     public Long getTShirtId() {
         return tShirtId;
@@ -63,22 +54,6 @@ public class TShirt {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Long getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Long quantity) {
-        this.quantity = quantity;
     }
 
     @Override

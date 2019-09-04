@@ -4,7 +4,7 @@ import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public class Game {
+public class Game extends Item {
 
     @Digits(integer = 11, fraction = 0, message = "Invalid gameId. Must be a whole number up to 11 digits long.")
     private Long gameId;
@@ -21,17 +21,9 @@ public class Game {
     @Size(max = 255, message = "Invalid description: must not be longer than 255 characters.")
     private String description;
 
-    @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid price. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
-    private BigDecimal price;
-
     @NotBlank(message = "Invalid studio: cannot be empty or blank.")
     @Size(max = 50, message = "Invalid studio: must not be longer than 50 characters.")
     private String studio;
-
-    @Digits(integer = 11, fraction = 0, message = "Invalid quantity. Must be a whole number up to 11 digits long.")
-    private Long quantity;
 
     public Long getGameId() {
         return gameId;
@@ -65,28 +57,12 @@ public class Game {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
     public String getStudio() {
         return studio;
     }
 
     public void setStudio(String studio) {
         this.studio = studio;
-    }
-
-    public Long getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Long quantity) {
-        this.quantity = quantity;
     }
 
     @Override
