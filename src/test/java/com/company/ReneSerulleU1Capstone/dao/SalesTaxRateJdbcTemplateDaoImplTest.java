@@ -40,7 +40,7 @@ public class SalesTaxRateJdbcTemplateDaoImplTest {
 
     private void resetSalesTaxRateTable() {
         List<SalesTaxRate> salesTaxRates = salesTaxRateDao.findAll();
-        salesTaxRates.forEach(salesTaxRate -> salesTaxRateDao.delete(salesTaxRate));
+        salesTaxRates.forEach(salesTaxRate -> salesTaxRateDao.delete(salesTaxRate.getState()));
 
         salesTaxRateDao.add(new SalesTaxRate() {{ setState("AL"); setRate(new BigDecimal(0.05)); }});
         salesTaxRateDao.add(new SalesTaxRate() {{ setState("AK"); setRate(new BigDecimal(0.06)); }});
@@ -114,22 +114,19 @@ public class SalesTaxRateJdbcTemplateDaoImplTest {
         salesTaxRateDao.add(salesTaxRate);
 
         // test get
-        List<SalesTaxRate> salesTaxRates = salesTaxRateDao.find(salesTaxRate.getState());
-        assertEquals(salesTaxRates.get(0), salesTaxRate);
+        SalesTaxRate salesTaxRate1 = salesTaxRateDao.find(salesTaxRate.getState());
+        assertEquals(salesTaxRate1, salesTaxRate);
 
         // test update
         salesTaxRate.setRate(new BigDecimal(0.02).setScale(2, RoundingMode.HALF_UP));
-        salesTaxRateDao.update(salesTaxRate, new SalesTaxRate() {{
-            setState("PR");
-            setRate(new BigDecimal(0.01).setScale(2, RoundingMode.HALF_UP));
-        }});
-        salesTaxRates = salesTaxRateDao.find(salesTaxRate.getState());
-        assertEquals(salesTaxRates.get(0), salesTaxRate);
+        salesTaxRateDao.update(salesTaxRate, "PR");
+        salesTaxRate1 = salesTaxRateDao.find(salesTaxRate.getState());
+        assertEquals(salesTaxRate1, salesTaxRate);
 
         // test delete
-        salesTaxRateDao.delete(salesTaxRate);
-        salesTaxRates = salesTaxRateDao.find(salesTaxRate.getState());
-        assertEquals(salesTaxRates.size(), 0);
+        salesTaxRateDao.delete(salesTaxRate.getState());
+        salesTaxRate1 = salesTaxRateDao.find(salesTaxRate.getState());
+        assertNull(salesTaxRate1);
     }
 
     @Test

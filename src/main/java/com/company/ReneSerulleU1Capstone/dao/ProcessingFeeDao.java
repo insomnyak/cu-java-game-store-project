@@ -9,10 +9,10 @@ import java.util.List;
 public interface ProcessingFeeDao {
     // CRUD
     ProcessingFee add(ProcessingFee processingFee);
-    List<ProcessingFee> find(String productType);
+    ProcessingFee find(String productType);
     List<ProcessingFee> findAll();
-    void update(ProcessingFee processingFee, ProcessingFee oldProcessingFee);
-    void delete(ProcessingFee processingFee);
+    void update(ProcessingFee processingFee, String productType);
+    void delete(String productType);
 
     ProcessingFee mapRowToProcessingFee(ResultSet rs, int rowNum) throws SQLException;
 }
