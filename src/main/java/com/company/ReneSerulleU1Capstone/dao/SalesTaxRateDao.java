@@ -9,10 +9,10 @@ import java.util.List;
 public interface SalesTaxRateDao {
     // CRUD
     SalesTaxRate add(SalesTaxRate salesTaxRate);
-    List<SalesTaxRate> find(String state);
+    SalesTaxRate find(String state);
     List<SalesTaxRate> findAll();
-    void update(SalesTaxRate salesTaxRate, SalesTaxRate oldSalesTaxRate);
-    void delete(SalesTaxRate salesTaxRate);
+    void update(SalesTaxRate salesTaxRate, String stateCode);
+    void delete(String stateCode);
 
     SalesTaxRate mapRowToSalesTaxRate(ResultSet rs, int rowNum) throws SQLException;
 }

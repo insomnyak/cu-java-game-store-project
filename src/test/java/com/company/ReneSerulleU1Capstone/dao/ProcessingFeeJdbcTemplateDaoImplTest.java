@@ -40,10 +40,10 @@ public class ProcessingFeeJdbcTemplateDaoImplTest {
 
     private void resetProcessingFeeTable() {
         List<ProcessingFee> processingFees = processingFeeDao.findAll();
-        processingFees.forEach(processingFee -> processingFeeDao.delete(processingFee));
+        processingFees.forEach(processingFee -> processingFeeDao.delete(processingFee.getProductType()));
 
         processingFeeDao.add(new ProcessingFee() {{ setProductType("Consoles"); setFee(new BigDecimal(14.99)); }});
-        processingFeeDao.add(new ProcessingFee() {{ setProductType("Shirts"); setFee(new BigDecimal(1.98)); }});
+        processingFeeDao.add(new ProcessingFee() {{ setProductType("T-Shirts"); setFee(new BigDecimal(1.98)); }});
         processingFeeDao.add(new ProcessingFee() {{ setProductType("Games"); setFee(new BigDecimal(1.49)); }});
     }
 
@@ -67,22 +67,19 @@ public class ProcessingFeeJdbcTemplateDaoImplTest {
         processingFeeDao.add(processingFee1);
 
         // test get
-        List<ProcessingFee> processingFees = processingFeeDao.find(processingFee1.getProductType());
-        assertEquals(processingFees.get(0), processingFee1);
+        ProcessingFee processingFee2 = processingFeeDao.find(processingFee1.getProductType());
+        assertEquals(processingFee2, processingFee1);
 
         // test update
         processingFee1.setFee(new BigDecimal(29.33).setScale(2, RoundingMode.HALF_UP));
-        processingFeeDao.update(processingFee1, new ProcessingFee() {{
-            setProductType("Unknown");
-            setFee(new BigDecimal(24.33).setScale(2, RoundingMode.HALF_UP));
-        }});
-        processingFees = processingFeeDao.find(processingFee1.getProductType());
-        assertEquals(processingFees.get(0), processingFee1);
+        processingFeeDao.update(processingFee1, "Unknown");
+        processingFee2 = processingFeeDao.find(processingFee1.getProductType());
+        assertEquals(processingFee2, processingFee1);
 
         // test delete
-        processingFeeDao.delete(processingFee1);
-        processingFees = processingFeeDao.find(processingFee1.getProductType());
-        assertEquals(processingFees.size(), 0);
+        processingFeeDao.delete(processingFee1.getProductType());
+        processingFee2 = processingFeeDao.find(processingFee1.getProductType());
+        assertNull(processingFee2);
     }
 
     @Test
