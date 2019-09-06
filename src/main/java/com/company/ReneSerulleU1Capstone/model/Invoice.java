@@ -41,8 +41,8 @@ public class Invoice {
     private Long itemId;
 
     @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid price. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal unitPrice;
 
     @NotNull
@@ -50,23 +50,23 @@ public class Invoice {
     private Long quantity;
 
     @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid subtotal. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal subtotal;
 
     @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid tax. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal tax;
 
     @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid processingFee. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal processingFee;
 
     @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid total. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal total;
 
     public Long getInvoiceId() {

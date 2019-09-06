@@ -1,4 +1,6 @@
 package com.company.ReneSerulleU1Capstone.viewmodel;
 
-public class ProcessingFeeViewModel {
+import com.company.ReneSerulleU1Capstone.model.ProcessingFee;
+
+public class ProcessingFeeViewModel extends ProcessingFee {
 }

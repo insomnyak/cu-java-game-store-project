@@ -21,8 +21,8 @@ import java.math.BigDecimal;
 public abstract class Item {
 
     @NotNull
-    @Digits(integer = 5, fraction = 2, message = "Invalid price. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     @Min(value = 0, message = "Invalid quantity. Must be greater than or equal to 0.")
     private BigDecimal price;
 

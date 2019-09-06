@@ -12,8 +12,8 @@ public class ProcessingFee {
     @Size(max = 20, message = "Invalid productType: must not be longer than 20 characters.")
     private String productType;
 
-    @Digits(integer = 4, fraction = 2, message = "Invalid price. Can contain up to 4 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 2, fraction = 2, message = "Invalid subtotal. Can contain up to 4 digits, " +
+            "2 of which are decimals.")
     private BigDecimal fee;
 
     public String getProductType() {

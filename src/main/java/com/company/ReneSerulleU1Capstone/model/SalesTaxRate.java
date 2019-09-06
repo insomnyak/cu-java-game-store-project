@@ -14,8 +14,8 @@ public class SalesTaxRate {
     private String state;
 
     @NotNull
-    @Digits(integer = 3, fraction = 2, message = "Invalid price. Can contain up to 3 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 1, fraction = 2, message = "Invalid subtotal. Can contain up to 3 digits, " +
+            "2 of which are decimals.")
     private BigDecimal rate;
 
     public String getState() {
