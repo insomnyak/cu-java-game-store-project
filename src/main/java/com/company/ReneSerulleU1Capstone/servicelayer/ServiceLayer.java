@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 
+import javax.management.InvalidAttributeValueException;
 import java.io.InvalidClassException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,6 +33,7 @@ public class ServiceLayer {
     protected InvoiceDao invoiceDao;
 
     private final Long maxQuantityBeforeExtraFee = 10L;
+    private final BigDecimal maxPurchaseTotal = new BigDecimal(999.99).setScale(2, RoundingMode.HALF_UP);
 
     @Autowired
     Map<String, String> states;
@@ -56,8 +58,9 @@ public class ServiceLayer {
             consoleDao.update((Console) item);
         } else if (item instanceof TShirt) {
             tShirtDao.update((TShirt) item);
+        } else {
+            throw invalidTypeIdException(item.getClass().getTypeName());
         }
-        throw invalidTypeIdException(item.getClass().getTypeName());
     }
 
     public Item find(String itemType, Long id) throws InvalidTypeIdException {
@@ -169,7 +172,7 @@ public class ServiceLayer {
     }
 
     @Transactional
-    public PurchaseViewModel add(PurchaseViewModel pvm) throws InvalidTypeIdException {
+    public PurchaseViewModel add(PurchaseViewModel pvm) throws InvalidTypeIdException, InvalidAttributeValueException {
         String itemType = pvm.getItemType();
         Item item = find(itemType, pvm.getItemId());
 
@@ -203,15 +206,17 @@ public class ServiceLayer {
             setProcessingFee(pvm.getProcessingFee());
             setTotal(pvm.getTotal());
         }};
-        invoiceDao.add(invoice);
+
+        invoice = invoiceDao.add(invoice);
 
         pvm.setInvoiceId(invoice.getInvoiceId());
+        pvm.setItem(item);
 
         return pvm;
     }
 
     public void setCalculatedAttributes(PurchaseViewModel pvm, Item item, SalesTaxRate salesTaxRate,
-                                        ProcessingFee processingFee) {
+                                        ProcessingFee processingFee) throws InvalidAttributeValueException {
         BigDecimal unitPrice = item.getPrice();
         Long quantity = pvm.getQuantity();
         BigDecimal subtotal = unitPrice.multiply(new BigDecimal(quantity));
@@ -220,6 +225,12 @@ public class ServiceLayer {
                 processingFee.getFee().add(
                         new BigDecimal(Double.parseDouble(AdditionalProcessingFee.GREATER_THAN_10.toString())));
         BigDecimal total = subtotal.add(tax).add(fee);
+
+        if (total.compareTo(maxPurchaseTotal) > 0) {
+            throw new InvalidAttributeValueException(String.format("Your total cannot exceed %s. " +
+                    "Please reduce your order quantity.", maxPurchaseTotal));
+        }
+
         pvm.setUnitPrice(unitPrice);
         pvm.setSubtotal(subtotal);
         pvm.setTax(tax);
@@ -252,15 +263,17 @@ public class ServiceLayer {
                         "NOTE: please use the /salesTaxRate service to get the list of accepted state codes.");
             }
             stateCode = states.get(state.toLowerCase());
-            if (stateCode == null) {
+            if (stateCode == null || stateCode.isEmpty()) {
                 throw new NoSuchElementException("State value not valid. Please provide either " +
                         "1) the state code (a 2-letter abbreviation), or " +
                         "2) the full state name. "+
                         "NOTE: please use the /salesTaxRate service to get the list of accepted state codes.");
             }
+        } else if (state.length() == 2) {
+            stateCode = state;
         }
         SalesTaxRate str = salesTaxRateDao.find(stateCode);
-        if (str == null) {
+        if (stateCode.isEmpty() || str == null) {
             throw new NoSuchElementException("State Code not found. " +
                     "NOTE: please use the /salesTaxRate service to get the list of accepted state codes.");
         }
@@ -348,17 +361,17 @@ public class ServiceLayer {
     }
 
     public IllegalArgumentException illegalArgumentException(String itemType, List<String> acceptedValues) {
-        String values = "";
+        StringBuilder values = new StringBuilder();
         int len = acceptedValues.size();
         for (int i = 0; i < len; i++) {
             if (i == 0) {
-                values += acceptedValues.get(i);
+                values.append(acceptedValues.get(i));
             } else {
-                values += ", " + acceptedValues.get(i);
+                values.append(", ").append(acceptedValues.get(i));
             }
         }
         return new IllegalArgumentException(
-                String.format("Invalid values for %s. Please select from: %s", itemType, values));
+                String.format("Invalid values for %s. Please select from: %s", itemType, values.toString()));
     }
 
 

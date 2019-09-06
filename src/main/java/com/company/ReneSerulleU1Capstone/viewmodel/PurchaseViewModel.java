@@ -43,28 +43,28 @@ public class PurchaseViewModel {
     @Digits(integer = 11, fraction = 0, message = "Invalid itemId. Must be a whole number up to 11 digits long.")
     private Long itemId;
 
-    @Digits(integer = 5, fraction = 2, message = "Invalid price. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal unitPrice;
 
     @Digits(integer = 11, fraction = 0, message = "Invalid quantity. Must be a whole number up to 11 digits long.")
     @Min(value = 1, message = "Invalid quantity. Must be at least 1.")
     private Long quantity;
 
-    @Digits(integer = 5, fraction = 2, message = "Invalid subtotal. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal subtotal;
 
-    @Digits(integer = 5, fraction = 2, message = "Invalid tax. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal tax;
 
-    @Digits(integer = 5, fraction = 2, message = "Invalid processingFee. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal processingFee;
 
-    @Digits(integer = 5, fraction = 2, message = "Invalid total. Can contain up to 5 whole number digits " +
-            "and 2 decimals.")
+    @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
+            "2 of which are decimals.")
     private BigDecimal total;
 
     public Long getInvoiceId() {

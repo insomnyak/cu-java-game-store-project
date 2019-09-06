@@ -46,10 +46,13 @@ public class InventoryServiceLayer extends ServiceLayer {
         switch (itemType) {
             case ItemType.game:
                 gameDao.delete(id);
+                break;
             case ItemType.console:
                 consoleDao.delete(id);
+                break;
             case ItemType.tShirt:
                 tShirtDao.delete(id);
+                break;
             default:
                 throw invalidTypeIdException(itemType);
         }
@@ -67,7 +70,7 @@ public class InventoryServiceLayer extends ServiceLayer {
     @Override
     public List<?> findAll(Class className) throws InvalidClassException {
         try {
-            super.findAll(className);
+            return super.findAll(className);
         } catch (InvalidClassException ignore) {}
 
         if (className.equals(PurchaseViewModel.class)) {
@@ -106,17 +109,19 @@ public class InventoryServiceLayer extends ServiceLayer {
             processingFeeDao.update((ProcessingFee) obj, lookupValue);
         } else if (className.equals(SalesTaxRateViewModel.class)) {
             salesTaxRateDao.update((SalesTaxRate) obj, lookupValue);
+        } else {
+            throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
         }
-
-        throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
     }
 
     @Transactional
-    public void delete(Class className, String value) {
+    public void delete(Class className, String value) throws InvalidClassException {
         if (className.equals(ProcessingFeeViewModel.class)) {
             processingFeeDao.delete(value);
         } else if (className.equals(SalesTaxRateViewModel.class)) {
             salesTaxRateDao.delete(value);
+        }   else {
+            throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
         }
     }
 }
