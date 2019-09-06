@@ -66,11 +66,11 @@ public class InventoryServiceLayer extends ServiceLayer {
 
     @Override
     public List<?> findAll(Class className) throws InvalidClassException {
-        if (className.equals(ProcessingFeeViewModel.class)) {
-            return processingFeeDao.findAll();
-        } else if (className.equals(SalesTaxRateViewModel.class)) {
-            return salesTaxRateDao.findAll();
-        } else if (className.equals(PurchaseViewModel.class)) {
+        try {
+            super.findAll(className);
+        } catch (InvalidClassException ignore) {}
+
+        if (className.equals(PurchaseViewModel.class)) {
             List<PurchaseViewModel> pvms = new ArrayList<>();
             List<Invoice> invoices = invoiceDao.findAll();
             if (invoices == null || invoices.isEmpty()) return null;
