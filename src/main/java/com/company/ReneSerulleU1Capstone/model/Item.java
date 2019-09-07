@@ -2,16 +2,15 @@ package com.company.ReneSerulleU1Capstone.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeId;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"$type"})
 @JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property = "$type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = Console.class, name = ItemType.console),
@@ -19,6 +18,8 @@ import java.math.BigDecimal;
         @JsonSubTypes.Type(value = TShirt.class, name = ItemType.tShirt)
 })
 public abstract class Item {
+
+    private String $type;
 
     @NotNull
     @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
@@ -45,5 +46,13 @@ public abstract class Item {
 
     public void setQuantity(Long quantity) {
         this.quantity = quantity;
+    }
+
+    public String get$type() {
+        return $type;
+    }
+
+    public void set$type(String $type) {
+        this.$type = $type;
     }
 }

@@ -5,7 +5,9 @@ import com.company.ReneSerulleU1Capstone.model.*;
 import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
 import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
 import com.company.ReneSerulleU1Capstone.viewmodel.SalesTaxRateViewModel;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
@@ -15,12 +17,13 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import javax.management.InvalidAttributeValueException;
 import java.io.InvalidClassException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Controller @Primary
 public class ServiceLayer {
@@ -147,6 +150,28 @@ public class ServiceLayer {
         throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
     }
 
+    public Map<String, BigDecimal> findAllAsMap(Class className) throws InvalidClassException {
+        List<?> list = findAll(className);
+        if (list == null || list.isEmpty()) throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
+                "List not found. Please contact support");
+
+        Map<String, BigDecimal> map = new HashMap<>();
+
+        if (className.equals(ProcessingFeeViewModel.class)) {
+            list.stream().forEach(val -> {
+                ProcessingFee pf = (ProcessingFee) val;
+                map.put(pf.getProductType(), pf.getFee());
+            });
+        } else if (className.equals(SalesTaxRateViewModel.class)) {
+            list.stream().forEach(val -> {
+                SalesTaxRate str = (SalesTaxRate) val;
+                map.put(str.getState(), str.getRate());
+            });
+        }
+
+        return map;
+    }
+
     public List<String> findAllProductTypes() throws InvalidClassException {
         List<String> productTypes = new ArrayList<>();
         List<?> processingFees = findAll(ProcessingFeeViewModel.class);
@@ -157,7 +182,6 @@ public class ServiceLayer {
         return productTypes;
     }
 
-    @Transactional
     public Object find(Class className, Long id) throws InvalidTypeIdException, InvalidClassException {
         if (className.equals(PurchaseViewModel.class)) {
             Invoice invoice = invoiceDao.find(id);

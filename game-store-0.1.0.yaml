@@ -4,7 +4,7 @@ info:
   description: Rene Serulle U1 Capstone. This is a REST Inventory Management Web Service for a Video Game Store
   contact:
     email: rene+GameStoreSupport@insomnyak.com
-  version: 0.1.0
+  version: 0.0.1
 servers:
   - url: 'http://localhost:8080'
     description: local dev server
@@ -30,6 +30,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SalesTaxRate'
+  /processingFee:
+    get:
+      summary: returns each Item Type and its respective processing fee
+      responses:
+        '200':
+          description: List of all processing fees
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessingFee'
 
   /item/{type}:
     get:
@@ -99,7 +109,7 @@ paths:
 
   /item/{type}/{attribute}/{value}:
     get:
-      summary: returns item with specified type and id
+      summary: returns a list of items of the specified 'type' where 'attribute' is equal to 'value'.
       parameters:
         - name: type
           in: path
@@ -121,11 +131,11 @@ paths:
             type: string
       responses:
         '200':
-          description: the item with specified type and id
+          description: successfully retrieved list of items with 'attribute' equal to 'value'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Item'
+                $ref: '#/components/schemas/Items'
         '400':
           description: Bad Request
         '404':
@@ -178,10 +188,16 @@ paths:
         '415':
           description: Unsupported media type, the request body should be json
 
-  /item/inventory/{id}:
+  /item/{type}/inventory/{id}:
     delete:
       summary: deletes an item from the DB of specified type and id
       parameters:
+        - name: type
+          in: path
+          required: true
+          description: The item type
+          schema:
+            type: string
         - name: id
           in: path
           required: true
@@ -220,6 +236,39 @@ paths:
           description: Missing a field
         '415':
           description: Unsupported media type, the request body should be json
+
+  /purchase/invoice:
+    get:
+      summary: returns all invoices
+      responses:
+        '200':
+          description: found invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+        '404':
+          description: invoices not found
+
+  /purchase/invoice/{id}:
+    get:
+      summary: returns an invoice of given id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The invoice id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: found invoice
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+        '404':
+          description: invoice not found
 
 components:
   schemas:
@@ -337,6 +386,10 @@ components:
       items:
         type: string
     SalesTaxRate:
+      type: object
+      additionalProperties:
+        type: string
+    ProcessingFee:
       type: object
       additionalProperties:
         type: string

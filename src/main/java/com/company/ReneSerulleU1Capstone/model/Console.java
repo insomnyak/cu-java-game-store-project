@@ -1,5 +1,7 @@
 package com.company.ReneSerulleU1Capstone.model;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -7,6 +9,7 @@ import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+@JsonTypeName(ItemType.console)
 public class Console extends Item {
 
     @Digits(integer = 11, fraction = 0, message = "Invalid consoleId. Must be a whole number up to 11 digits long.")
