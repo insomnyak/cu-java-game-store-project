@@ -30,6 +30,15 @@ public class InventoryServiceLayer extends ServiceLayer {
     }
 
     @Transactional
+    public List<Item> add(List<Item> items) throws InvalidTypeIdException {
+        List<Item> addedItems = new ArrayList<>();
+        for (Item item : items) {
+            addedItems.add(add(item));
+        }
+        return addedItems;
+    }
+
+    @Transactional
     public Item add(Item item) throws InvalidTypeIdException {
         if (item instanceof Game) {
             return gameDao.add((Game) item);
@@ -39,6 +48,13 @@ public class InventoryServiceLayer extends ServiceLayer {
             return tShirtDao.add((TShirt) item);
         }
         throw invalidTypeIdException(item.getClass().getTypeName());
+    }
+
+    @Transactional
+    public void update(List<Item> items) throws InvalidTypeIdException {
+        for (Item item : items) {
+            update(item);
+        }
     }
 
     @Transactional

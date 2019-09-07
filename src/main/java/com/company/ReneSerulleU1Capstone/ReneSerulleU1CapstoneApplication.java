@@ -1,10 +1,16 @@
 package com.company.ReneSerulleU1Capstone;
 
+import com.company.ReneSerulleU1Capstone.dao.ConsoleJdbcTemplateDaoImpl;
+import com.company.ReneSerulleU1Capstone.dao.GameJdbcTemplateDaoImpl;
+import com.company.ReneSerulleU1Capstone.dao.TShirtJdbcTemplateDaoImpl;
+import com.company.ReneSerulleU1Capstone.model.ItemType;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;

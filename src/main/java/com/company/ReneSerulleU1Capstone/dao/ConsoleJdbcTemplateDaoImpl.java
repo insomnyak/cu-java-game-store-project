@@ -1,6 +1,8 @@
 package com.company.ReneSerulleU1Capstone.dao;
 
 import com.company.ReneSerulleU1Capstone.model.Console;
+import com.company.ReneSerulleU1Capstone.model.ItemType;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
