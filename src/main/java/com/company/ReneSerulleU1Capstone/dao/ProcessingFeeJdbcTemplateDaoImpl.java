@@ -17,7 +17,7 @@ public class ProcessingFeeJdbcTemplateDaoImpl implements ProcessingFeeDao {
     private final String INSERT_PROCESSING_FEE_SQL =
             "insert into processing_fee (product_type, fee) values (?,?)";
     private final String UPDATE_PROCESSING_FEE_SQL =
-            "update processing_fee set product_type = ?, fee = ? where product_type = ?";
+            "update processing_fee set product_type = ?, fee = ? where product_type = ? limit 1";
     private final String SELECT_PROCESSING_FEE_SQL =
             "select * from processing_fee where product_type = ?";
     private final String SELECT_ALL_PROCESSING_FEES_SQL =

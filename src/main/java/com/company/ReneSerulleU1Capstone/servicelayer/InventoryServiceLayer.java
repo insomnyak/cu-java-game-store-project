@@ -93,9 +93,25 @@ public class InventoryServiceLayer extends ServiceLayer {
         matchObjectToClass(className, obj);
 
         if (className.equals(ProcessingFeeViewModel.class)) {
-            return processingFeeDao.add((ProcessingFee) obj);
+            ProcessingFee pf = (ProcessingFee) obj;
+            // check if productType exists. If it exists, trigger an update instead
+            ProcessingFee pf2 = processingFeeDao.find(pf.getProductType());
+            if (pf2 == null) {
+                return processingFeeDao.add(pf);
+            } else {
+                processingFeeDao.update(pf, pf.getProductType());
+                return pf;
+            }
         } else if (className.equals(SalesTaxRateViewModel.class)) {
-            return salesTaxRateDao.add((SalesTaxRate) obj);
+            SalesTaxRate str = (SalesTaxRate) obj;
+            // check if state exists. If it exists, trigger an update instead
+            SalesTaxRate str2 = salesTaxRateDao.find(str.getState());
+            if (str2 == null) {
+                return salesTaxRateDao.add(str);
+            } else {
+                salesTaxRateDao.update(str, str.getState());
+                return str;
+            }
         }
 
         throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);

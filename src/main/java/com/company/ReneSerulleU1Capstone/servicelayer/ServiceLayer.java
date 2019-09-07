@@ -32,9 +32,6 @@ public class ServiceLayer {
     protected SalesTaxRateDao salesTaxRateDao;
     protected InvoiceDao invoiceDao;
 
-    private final Long maxQuantityBeforeExtraFee = 10L;
-    private final BigDecimal maxPurchaseTotal = new BigDecimal(999.99).setScale(2, RoundingMode.HALF_UP);
-
     @Autowired
     Map<String, String> states;
 
@@ -105,14 +102,14 @@ public class ServiceLayer {
                     case "title":
                         return gameDao.findAllByTitle(value);
                     default:
-                        throw illegalArgumentException(itemType, ItemType.gameSearchableAttributes);
+                        throw illegalArgumentException(itemType, DtoSearchableAttributes.GAME.getList());
                 }
             case ItemType.console:
                 switch (attribute.toLowerCase().trim()) {
                     case "manufacturer":
                         return consoleDao.findAllByManufacturer(value);
                     default:
-                        throw illegalArgumentException(itemType, ItemType.consoleSearchableAttributes);
+                        throw illegalArgumentException(itemType, DtoSearchableAttributes.CONSOLE.getList());
                 }
             case ItemType.tShirt:
                 switch (attribute.toLowerCase().trim()) {
@@ -121,7 +118,7 @@ public class ServiceLayer {
                     case "size":
                         return tShirtDao.findAllBySize(value);
                     default:
-                        throw illegalArgumentException(itemType, ItemType.tShirtSearchableAttributes);
+                        throw illegalArgumentException(itemType, DtoSearchableAttributes.T_SHIRTS.getList());
                 }
             default:
                 throw invalidTypeIdException(itemType);
@@ -131,11 +128,11 @@ public class ServiceLayer {
     public List<String> findSearchableAttributes(String itemType) throws InvalidTypeIdException {
         switch (itemType) {
             case ItemType.game:
-                return ItemType.gameSearchableAttributes;
+                return DtoSearchableAttributes.GAME.getList();
             case ItemType.console:
-                return ItemType.consoleSearchableAttributes;
+                return DtoSearchableAttributes.CONSOLE.getList();
             case ItemType.tShirt:
-                return ItemType.tShirtSearchableAttributes;
+                return DtoSearchableAttributes.T_SHIRTS.getList();
             default:
                 throw invalidTypeIdException(itemType);
         }
@@ -221,14 +218,14 @@ public class ServiceLayer {
         Long quantity = pvm.getQuantity();
         BigDecimal subtotal = unitPrice.multiply(new BigDecimal(quantity));
         BigDecimal tax = subtotal.multiply(salesTaxRate.getRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal fee = quantity <= maxQuantityBeforeExtraFee ? processingFee.getFee() :
+        BigDecimal fee = quantity <= BLSettings.MAX_QTY_BEFORE_EXTRA_FEE.getLong() ? processingFee.getFee() :
                 processingFee.getFee().add(
-                        new BigDecimal(Double.parseDouble(AdditionalProcessingFee.GREATER_THAN_10.toString())));
+                        BLSettings.FEE_QTY_GREATER_THAN_10.getValue());
         BigDecimal total = subtotal.add(tax).add(fee);
 
-        if (total.compareTo(maxPurchaseTotal) > 0) {
+        if (total.compareTo(BLSettings.MAX_PURCHASE_TOTAL.getValue()) > 0) {
             throw new InvalidAttributeValueException(String.format("Your total cannot exceed %s. " +
-                    "Please reduce your order quantity.", maxPurchaseTotal));
+                    "Please reduce your order quantity.", BLSettings.MAX_PURCHASE_TOTAL.getValue()));
         }
 
         pvm.setUnitPrice(unitPrice);

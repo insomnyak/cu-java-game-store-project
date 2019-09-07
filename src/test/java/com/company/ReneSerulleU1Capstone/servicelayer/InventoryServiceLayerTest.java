@@ -35,61 +35,61 @@ public class InventoryServiceLayerTest {
     InventoryServiceLayer sl;
 
     // add, get
-    private Game game1a = new Game();
-    private Game game1b = new Game();
-    private Console console1a = new Console();
-    private Console console1b = new Console();
-    private TShirt tShirt1a = new TShirt();
-    private TShirt tShirt1b = new TShirt();
-    private ProcessingFee processingFee1 = new ProcessingFee();
-    private ProcessingFee processingFee2 = new ProcessingFee();
-    private ProcessingFee processingFee3 = new ProcessingFee();
-    private SalesTaxRate salesTaxRate1 = new SalesTaxRate();
-    private SalesTaxRate salesTaxRate2 = new SalesTaxRate();
+    private Game game1a;
+    private Game game1b;
+    private Console console1a;
+    private Console console1b;
+    private TShirt tShirt1a;
+    private TShirt tShirt1b;
+    private ProcessingFee processingFee1;
+    private ProcessingFee processingFee2;
+    private ProcessingFee processingFee3;
+    private SalesTaxRate salesTaxRate1;
+    private SalesTaxRate salesTaxRate2;
     // add, get Console
-    private Invoice invoice1a = new Invoice();
-    private Invoice invoice1b = new Invoice();
+    private Invoice invoice1a;
+    private Invoice invoice1b;
     // add, get Game
-    private Invoice invoice2a = new Invoice();
-    private Invoice invoice2b = new Invoice();
+    private Invoice invoice2a;
+    private Invoice invoice2b;
     // add, get TShirt
-    private Invoice invoice3a = new Invoice();
-    private Invoice invoice3b = new Invoice();
+    private Invoice invoice3a;
+    private Invoice invoice3b;
 
     // update
-    private Game game2a = new Game();
-    private Game game2b = new Game();
-    private Game game2c = new Game();
-    private Console console2a = new Console();
-    private Console console2b = new Console();
-    private Console console2c = new Console();
-    private TShirt tShirt2a = new TShirt();
-    private TShirt tShirt2b = new TShirt();
-    private TShirt tShirt2c = new TShirt();
-    private ProcessingFee processingFee4a = new ProcessingFee();
-    private ProcessingFee processingFee4b = new ProcessingFee();
-    private SalesTaxRate salesTaxRate3a = new SalesTaxRate();
-    private SalesTaxRate salesTaxRate3b = new SalesTaxRate();
+    private Game game2a;
+    private Game game2b;
+    private Game game2c;
+    private Console console2a;
+    private Console console2b;
+    private Console console2c;
+    private TShirt tShirt2a;
+    private TShirt tShirt2b;
+    private TShirt tShirt2c;
+    private ProcessingFee processingFee4a;
+    private ProcessingFee processingFee4b;
+    private SalesTaxRate salesTaxRate3a;
+    private SalesTaxRate salesTaxRate3b;
 
     // add, get User purchase
-    private PurchaseViewModel purchaseViewModel1 = new PurchaseViewModel();
-    private PurchaseViewModel purchaseViewModel2 = new PurchaseViewModel();
-    private PurchaseViewModel purchaseViewModel3 = new PurchaseViewModel();
+    private PurchaseViewModel purchaseViewModel1;
+    private PurchaseViewModel purchaseViewModel2;
+    private PurchaseViewModel purchaseViewModel3;
 
     // user purchase with invalid quantity
-    private PurchaseViewModel purchaseViewModel4 = new PurchaseViewModel();
+    private PurchaseViewModel purchaseViewModel4;
 
     // user purchase with invalid stateCode
-    private PurchaseViewModel purchaseViewModel5 = new PurchaseViewModel();
+    private PurchaseViewModel purchaseViewModel5;
 
     // user purchase with invalid itemType
-    private PurchaseViewModel purchaseViewModel6 = new PurchaseViewModel();
+    private PurchaseViewModel purchaseViewModel6;
 
     // user purchase with invalid ItemId
-    private PurchaseViewModel purchaseViewModel7 = new PurchaseViewModel();
+    private PurchaseViewModel purchaseViewModel7;
 
     // user purchase with invalid ItemId
-    private PurchaseViewModel purchaseViewModel8 = new PurchaseViewModel();
+    private PurchaseViewModel purchaseViewModel8;
 
     @Before
     public void setUp() throws Exception {
@@ -108,6 +108,62 @@ public class InventoryServiceLayerTest {
 
     @After
     public void tearDown() throws Exception {
+        // add, get
+        game1a = null;
+        game1b = null;
+        console1a = null;
+        console1b = null;
+        tShirt1a = null;
+        tShirt1b = null;
+        processingFee1 = null;
+        processingFee2 = null;
+        processingFee3 = null;
+        salesTaxRate1 = null;
+        salesTaxRate2 = null;
+        // add, get Console
+        invoice1a = null;
+        invoice1b = null;
+        // add, get Game
+        invoice2a = null;
+        invoice2b = null;
+        // add, get TShirt
+        invoice3a = null;
+        invoice3b = null;
+
+        // update
+        game2a = null;
+        game2b = null;
+        game2c = null;
+        console2a = null;
+        console2b = null;
+        console2c = null;
+        tShirt2a = null;
+        tShirt2b = null;
+        tShirt2c = null;
+        processingFee4a = null;
+        processingFee4b = null;
+        salesTaxRate3a = null;
+        salesTaxRate3b = null;
+
+        // add, get User purchase
+        purchaseViewModel1 = null;
+        purchaseViewModel2 = null;
+        purchaseViewModel3 = null;
+
+        // user purchase with invalid quantity
+        purchaseViewModel4 = null;
+
+        // user purchase with invalid stateCode
+        purchaseViewModel5 = null;
+
+        // user purchase with invalid itemType
+        purchaseViewModel6 = null;
+
+        // user purchase with invalid ItemId
+        purchaseViewModel7 = null;
+
+        // user purchase with invalid ItemId
+        purchaseViewModel8 = null;
     }
 
     // Processing Fee > Product Type: get list
@@ -349,7 +405,187 @@ public class InventoryServiceLayerTest {
         sl.add(purchaseViewModel8);
     }
 
+    public void setUpConsoleDaoMock() {
+        consoleDao = mock(ConsoleJdbcTemplateDaoImpl.class);
+
+        List<Console> consoles1 = new ArrayList<>();
+        consoles1.add(console1b);
+
+        List<Console> emptyList = new ArrayList<>();
+
+        doReturn(console1b).when(consoleDao).add(console1a);
+        doReturn(console1b).when(consoleDao).find(1L);
+        doReturn(consoles1).when(consoleDao).findAllByManufacturer("Sony");
+        doReturn(console2b).when(consoleDao).add(console2a);
+        doNothing().when(consoleDao).update(console2c);
+        doReturn(console2c).when(consoleDao).find(2L);
+        doNothing().when(consoleDao).delete(3L);
+        doReturn(null).when(consoleDao).find(3L);
+        doReturn(consoles1).when(consoleDao).findAll();
+        doReturn(emptyList).when(consoleDao).findAllByManufacturer("Blizzard");
+    }
+
+    public void setUpGameDaoMock() {
+        gameDao = mock(GameJdbcTemplateDaoImpl.class);
+
+        List<Game> games1 = new ArrayList<>();
+        games1.add(game1b);
+
+        List<Game> emptyList = new ArrayList<>();
+
+        doReturn(game1b).when(gameDao).add(game1a);
+        doReturn(game1b).when(gameDao).find(1L);
+        doReturn(games1).when(gameDao).findAll();
+        doReturn(games1).when(gameDao).findAllByTitle("Final Fantasy VIII");
+        doReturn(games1).when(gameDao).findAllByEsrbRating("A+");
+        doReturn(games1).when(gameDao).findAllByStudio("Square Enix");
+        doReturn(emptyList).when(gameDao).findAllByTitle("random");
+        doReturn(emptyList).when(gameDao).findAllByEsrbRating("random");
+        doReturn(emptyList).when(gameDao).findAllByStudio("random");
+        doReturn(game2b).when(gameDao).add(game2a);
+        doNothing().when(gameDao).update(game2c);
+        doReturn(game2c).when(gameDao).find(2L);
+        doNothing().when(gameDao).delete(3L);
+        doReturn(null).when(gameDao).find(3L);
+    }
+
+    public void setUpTShirtDaoMock() {
+        tShirtDao = mock(TShirtJdbcTemplateDaoImpl.class);
+
+        List<TShirt> tShirts1 = new ArrayList<>();
+        tShirts1.add(tShirt1b);
+
+        List<TShirt> emptyList = new ArrayList<>();
+
+        doReturn(tShirt1b).when(tShirtDao).add(tShirt1a);
+        doReturn(tShirt1b).when(tShirtDao).find(1L);
+        doReturn(tShirts1).when(tShirtDao).findAll();
+        doReturn(tShirts1).when(tShirtDao).findAllBySize("L");
+        doReturn(tShirts1).when(tShirtDao).findAllByColor("Black");
+        doReturn(emptyList).when(tShirtDao).findAllBySize("M");
+        doReturn(emptyList).when(tShirtDao).findAllByColor("Blue");
+        doReturn(tShirt2b).when(tShirtDao).add(tShirt2a);
+        doNothing().when(tShirtDao).update(tShirt2c);
+        doReturn(tShirt2c).when(tShirtDao).find(2L);
+        doNothing().when(tShirtDao).delete(3L);
+        doReturn(null).when(tShirtDao).find(3L);
+    }
+
+    public void setUpProcessingFeeDaoMock() {
+        processingFeeDao = mock(ProcessingFeeJdbcTemplateDaoImpl.class);
+
+        List<ProcessingFee> processingFees1 = new ArrayList<>();
+        processingFees1.add(processingFee1);
+        processingFees1.add(processingFee2);
+        processingFees1.add(processingFee3);
+
+        doReturn(processingFee1).when(processingFeeDao).add(processingFee1);
+        doReturn(processingFee2).when(processingFeeDao).add(processingFee2);
+        doReturn(processingFee3).when(processingFeeDao).add(processingFee3);
+        doReturn(processingFee1).when(processingFeeDao).find("Consoles");
+        doReturn(processingFee3).when(processingFeeDao).find("Games");
+        doReturn(processingFee2).when(processingFeeDao).find("T-Shirts");
+        doReturn(processingFees1).when(processingFeeDao).findAll();
+        doReturn(processingFee4a).when(processingFeeDao).add(processingFee4a);
+        doNothing().when(processingFeeDao).update(processingFee4b, "GamesTest");
+        doReturn(null).when(processingFeeDao).find("Xbox");
+        doNothing().when(processingFeeDao).delete("Candy");
+        doReturn(null).when(processingFeeDao).find("Candy");
+    }
+
+    public void setUpSalesTaxRateDaoMock() {
+        salesTaxRateDao = mock(SalesTaxRateJdbcTemplateDaoImpl.class);
+
+        List<SalesTaxRate> salesTaxRates1 = new ArrayList<>();
+        salesTaxRates1.add(salesTaxRate1);
+        salesTaxRates1.add(salesTaxRate2);
+
+        doReturn(salesTaxRate1).when(salesTaxRateDao).add(salesTaxRate1);
+        doReturn(salesTaxRate2).when(salesTaxRateDao).add(salesTaxRate2);
+        doReturn(salesTaxRate1).when(salesTaxRateDao).find("NY");
+        doReturn(salesTaxRate2).when(salesTaxRateDao).find("HI");
+        doReturn(salesTaxRates1).when(salesTaxRateDao).findAll();
+        doReturn(salesTaxRate3a).when(salesTaxRateDao).add(salesTaxRate3a);
+        doNothing().when(salesTaxRateDao).update(salesTaxRate3b, "FL");
+        doReturn(salesTaxRate3b).when(salesTaxRateDao).find("FL");
+        doNothing().when(processingFeeDao).delete("ZZ");
+        doReturn(null).when(processingFeeDao).find("ZZ");
+    }
+
+    public void setUpInvoiceDaoMock() {
+        invoiceDao = mock(InvoiceJdbcTemplateDaoImpl.class);
+
+        List<Invoice> invoices = new ArrayList<>();
+        invoices.add(invoice1b);
+
+        doReturn(invoice1b).when(invoiceDao).add(invoice1a);
+        doReturn(invoice1b).when(invoiceDao).find(1L);
+        doReturn(invoice2b).when(invoiceDao).add(invoice2a);
+        doReturn(invoice2b).when(invoiceDao).find(2L);
+        doReturn(invoice3b).when(invoiceDao).add(invoice3a);
+        doReturn(invoice3b).when(invoiceDao).find(3L);
+        doReturn(invoices).when(invoiceDao).findAll();
+        doReturn(null).when(invoiceDao).find(4L);
+    }
+
     public void constructSampleData() {
+        // add, get
+        game1a = new Game();
+        game1b = new Game();
+        console1a = new Console();
+        console1b = new Console();
+        tShirt1a = new TShirt();
+        tShirt1b = new TShirt();
+        processingFee1 = new ProcessingFee();
+        processingFee2 = new ProcessingFee();
+        processingFee3 = new ProcessingFee();
+        salesTaxRate1 = new SalesTaxRate();
+        salesTaxRate2 = new SalesTaxRate();
+        // add, get Console
+        invoice1a = new Invoice();
+        invoice1b = new Invoice();
+        // add, get Game
+        invoice2a = new Invoice();
+        invoice2b = new Invoice();
+        // add, get TShirt
+        invoice3a = new Invoice();
+        invoice3b = new Invoice();
+
+        // update
+        game2a = new Game();
+        game2b = new Game();
+        game2c = new Game();
+        console2a = new Console();
+        console2b = new Console();
+        console2c = new Console();
+        tShirt2a = new TShirt();
+        tShirt2b = new TShirt();
+        tShirt2c = new TShirt();
+        processingFee4a = new ProcessingFee();
+        processingFee4b = new ProcessingFee();
+        salesTaxRate3a = new SalesTaxRate();
+        salesTaxRate3b = new SalesTaxRate();
+
+        // add, get User purchase
+        purchaseViewModel1 = new PurchaseViewModel();
+        purchaseViewModel2 = new PurchaseViewModel();
+        purchaseViewModel3 = new PurchaseViewModel();
+
+        // user purchase with invalid quantity
+        purchaseViewModel4 = new PurchaseViewModel();
+
+        // user purchase with invalid stateCode
+        purchaseViewModel5 = new PurchaseViewModel();
+
+        // user purchase with invalid itemType
+        purchaseViewModel6 = new PurchaseViewModel();
+
+        // user purchase with invalid ItemId
+        purchaseViewModel7 = new PurchaseViewModel();
+
+        // user purchase with invalid ItemId
+        purchaseViewModel8 = new PurchaseViewModel();
+
         game1a.setTitle("Final Fantasy VIII");
         game1a.setEsrbRating("A+");
         game1a.setDescription("rpg");
@@ -644,128 +880,5 @@ public class InventoryServiceLayerTest {
         purchaseViewModel8.setItemType("Consoles");
         purchaseViewModel8.setItemId(2L);
         purchaseViewModel8.setQuantity(5L);
-    }
-
-    public void setUpConsoleDaoMock() {
-        consoleDao = mock(ConsoleJdbcTemplateDaoImpl.class);
-
-        List<Console> consoles1 = new ArrayList<>();
-        consoles1.add(console1b);
-
-        List<Console> emptyList = new ArrayList<>();
-
-        doReturn(console1b).when(consoleDao).add(console1a);
-        doReturn(console1b).when(consoleDao).find(1L);
-        doReturn(consoles1).when(consoleDao).findAllByManufacturer("Sony");
-        doReturn(console2b).when(consoleDao).add(console2a);
-        doNothing().when(consoleDao).update(console2c);
-        doReturn(console2c).when(consoleDao).find(2L);
-        doNothing().when(consoleDao).delete(3L);
-        doReturn(null).when(consoleDao).find(3L);
-        doReturn(consoles1).when(consoleDao).findAll();
-        doReturn(emptyList).when(consoleDao).findAllByManufacturer("Blizzard");
-    }
-
-    public void setUpGameDaoMock() {
-        gameDao = mock(GameJdbcTemplateDaoImpl.class);
-
-        List<Game> games1 = new ArrayList<>();
-        games1.add(game1b);
-
-        List<Game> emptyList = new ArrayList<>();
-
-        doReturn(game1b).when(gameDao).add(game1a);
-        doReturn(game1b).when(gameDao).find(1L);
-        doReturn(games1).when(gameDao).findAll();
-        doReturn(games1).when(gameDao).findAllByTitle("Final Fantasy VIII");
-        doReturn(games1).when(gameDao).findAllByEsrbRating("A+");
-        doReturn(games1).when(gameDao).findAllByStudio("Square Enix");
-        doReturn(emptyList).when(gameDao).findAllByTitle("random");
-        doReturn(emptyList).when(gameDao).findAllByEsrbRating("random");
-        doReturn(emptyList).when(gameDao).findAllByStudio("random");
-        doReturn(game2b).when(gameDao).add(game2a);
-        doNothing().when(gameDao).update(game2c);
-        doReturn(game2c).when(gameDao).find(2L);
-        doNothing().when(gameDao).delete(3L);
-        doReturn(null).when(gameDao).find(3L);
-    }
-
-    public void setUpTShirtDaoMock() {
-        tShirtDao = mock(TShirtJdbcTemplateDaoImpl.class);
-
-        List<TShirt> tShirts1 = new ArrayList<>();
-        tShirts1.add(tShirt1b);
-
-        List<TShirt> emptyList = new ArrayList<>();
-
-        doReturn(tShirt1b).when(tShirtDao).add(tShirt1a);
-        doReturn(tShirt1b).when(tShirtDao).find(1L);
-        doReturn(tShirts1).when(tShirtDao).findAll();
-        doReturn(tShirts1).when(tShirtDao).findAllBySize("L");
-        doReturn(tShirts1).when(tShirtDao).findAllByColor("Black");
-        doReturn(emptyList).when(tShirtDao).findAllBySize("M");
-        doReturn(emptyList).when(tShirtDao).findAllByColor("Blue");
-        doReturn(tShirt2b).when(tShirtDao).add(tShirt2a);
-        doNothing().when(tShirtDao).update(tShirt2c);
-        doReturn(tShirt2c).when(tShirtDao).find(2L);
-        doNothing().when(tShirtDao).delete(3L);
-        doReturn(null).when(tShirtDao).find(3L);
-    }
-
-    public void setUpProcessingFeeDaoMock() {
-        processingFeeDao = mock(ProcessingFeeJdbcTemplateDaoImpl.class);
-
-        List<ProcessingFee> processingFees1 = new ArrayList<>();
-        processingFees1.add(processingFee1);
-        processingFees1.add(processingFee2);
-        processingFees1.add(processingFee3);
-
-        doReturn(processingFee1).when(processingFeeDao).add(processingFee1);
-        doReturn(processingFee2).when(processingFeeDao).add(processingFee2);
-        doReturn(processingFee3).when(processingFeeDao).add(processingFee3);
-        doReturn(processingFee1).when(processingFeeDao).find("Consoles");
-        doReturn(processingFee3).when(processingFeeDao).find("Games");
-        doReturn(processingFee2).when(processingFeeDao).find("T-Shirts");
-        doReturn(processingFees1).when(processingFeeDao).findAll();
-        doReturn(processingFee4a).when(processingFeeDao).add(processingFee4a);
-        doNothing().when(processingFeeDao).update(processingFee4b, "GamesTest");
-        doReturn(null).when(processingFeeDao).find("Xbox");
-        doNothing().when(processingFeeDao).delete("Candy");
-        doReturn(null).when(processingFeeDao).find("Candy");
-    }
-
-    public void setUpSalesTaxRateDaoMock() {
-        salesTaxRateDao = mock(SalesTaxRateJdbcTemplateDaoImpl.class);
-
-        List<SalesTaxRate> salesTaxRates1 = new ArrayList<>();
-        salesTaxRates1.add(salesTaxRate1);
-        salesTaxRates1.add(salesTaxRate2);
-
-        doReturn(salesTaxRate1).when(salesTaxRateDao).add(salesTaxRate1);
-        doReturn(salesTaxRate2).when(salesTaxRateDao).add(salesTaxRate2);
-        doReturn(salesTaxRate1).when(salesTaxRateDao).find("NY");
-        doReturn(salesTaxRate2).when(salesTaxRateDao).find("HI");
-        doReturn(salesTaxRates1).when(salesTaxRateDao).findAll();
-        doReturn(salesTaxRate3a).when(salesTaxRateDao).add(salesTaxRate3a);
-        doNothing().when(salesTaxRateDao).update(salesTaxRate3b, "FL");
-        doReturn(salesTaxRate3b).when(salesTaxRateDao).find("FL");
-        doNothing().when(processingFeeDao).delete("ZZ");
-        doReturn(null).when(processingFeeDao).find("ZZ");
-    }
-
-    public void setUpInvoiceDaoMock() {
-        invoiceDao = mock(InvoiceJdbcTemplateDaoImpl.class);
-
-        List<Invoice> invoices = new ArrayList<>();
-        invoices.add(invoice1b);
-
-        doReturn(invoice1b).when(invoiceDao).add(invoice1a);
-        doReturn(invoice1b).when(invoiceDao).find(1L);
-        doReturn(invoice2b).when(invoiceDao).add(invoice2a);
-        doReturn(invoice2b).when(invoiceDao).find(2L);
-        doReturn(invoice3b).when(invoiceDao).add(invoice3a);
-        doReturn(invoice3b).when(invoiceDao).find(3L);
-        doReturn(invoices).when(invoiceDao).findAll();
-        doReturn(null).when(invoiceDao).find(4L);
     }
 }
