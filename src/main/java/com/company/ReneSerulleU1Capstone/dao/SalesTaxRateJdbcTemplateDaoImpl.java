@@ -17,7 +17,7 @@ public class SalesTaxRateJdbcTemplateDaoImpl implements SalesTaxRateDao{
     private final String INSERT_SALES_TAX_RATE_SQL =
             "insert into sales_tax_rate (state, rate) values (?,?)";
     private final String UPDATE_SALES_TAX_RATE_SQL =
-            "update sales_tax_rate set state = ?, rate = ? where state = ?";
+            "update sales_tax_rate set state = ?, rate = ? where state = ? limit 1";
     private final String SELECT_SALES_TAX_RATE_SQL =
             "select * from sales_tax_rate where state = ?";
     private final String SELECT_ALL_SALES_TAX_RATES_SQL =
