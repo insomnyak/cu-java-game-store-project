@@ -3,18 +3,19 @@ package com.company.ReneSerulleU1Capstone.servicelayer;
 import com.company.ReneSerulleU1Capstone.dao.*;
 import com.company.ReneSerulleU1Capstone.model.*;
 import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
+import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseFee;
 import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
 import com.company.ReneSerulleU1Capstone.viewmodel.SalesTaxRateViewModel;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.HttpServerErrorException;
 
 import java.io.InvalidClassException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class InventoryServiceLayer extends ServiceLayer {
@@ -105,6 +106,15 @@ public class InventoryServiceLayer extends ServiceLayer {
     }
 
     @Transactional
+    public List<?> add(ArrayList<PurchaseFee> purchaseFees) throws InvalidClassException {
+        List<Object> purchaseFees1 = new ArrayList<>();
+        for (PurchaseFee purchaseFee : purchaseFees) {
+            purchaseFees1.add(add(purchaseFee.getClass(), purchaseFee));
+        }
+        return purchaseFees1;
+    }
+
+    @Transactional
     public Object add(Class className, Object obj) throws InvalidClassException {
         matchObjectToClass(className, obj);
 
@@ -131,6 +141,13 @@ public class InventoryServiceLayer extends ServiceLayer {
         }
 
         throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
+    }
+
+    @Transactional
+    public void update(Map<String, PurchaseFee> purchaseFeeMap) throws InvalidClassException {
+        for (Map.Entry<String, PurchaseFee> entry : purchaseFeeMap.entrySet()) {
+            update(entry.getValue().getClass(), entry.getValue(), entry.getKey());
+        }
     }
 
     @Transactional

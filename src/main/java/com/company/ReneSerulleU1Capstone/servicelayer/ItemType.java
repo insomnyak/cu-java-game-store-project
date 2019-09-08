@@ -1,4 +1,4 @@
-package com.company.ReneSerulleU1Capstone.model;
+package com.company.ReneSerulleU1Capstone.servicelayer;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpServerErrorException.*;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.naming.ServiceUnavailableException;
 import javax.validation.ConstraintViolationException;
 import java.io.InvalidClassException;
 import java.sql.SQLIntegrityConstraintViolationException;
@@ -146,6 +149,16 @@ public class ControllerExceptionHandler {
 
         VndErrors error = new VndErrors(request.toString(), e.getMessage());
         ResponseEntity<VndErrors> responseEntity = new ResponseEntity<>(error, HttpStatus.UNPROCESSABLE_ENTITY);
+        return responseEntity;
+    }
+
+    @ExceptionHandler(value = {ServiceUnavailableException.class})
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ResponseEntity<VndErrors> invalidClassException(
+            ServiceUnavailableException e, WebRequest request) {
+
+        VndErrors error = new VndErrors(request.toString(), e.getMessage());
+        ResponseEntity<VndErrors> responseEntity = new ResponseEntity<>(error, HttpStatus.SERVICE_UNAVAILABLE);
         return responseEntity;
     }
 

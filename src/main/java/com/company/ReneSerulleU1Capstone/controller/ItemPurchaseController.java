@@ -1,12 +1,6 @@
 package com.company.ReneSerulleU1Capstone.controller;
 
-import com.company.ReneSerulleU1Capstone.dao.ItemDao;
-import com.company.ReneSerulleU1Capstone.model.Game;
 import com.company.ReneSerulleU1Capstone.model.Item;
-import com.company.ReneSerulleU1Capstone.model.ProcessingFee;
-import com.company.ReneSerulleU1Capstone.servicelayer.BLSettings;
-import com.company.ReneSerulleU1Capstone.servicelayer.DtoSearchableAttributes;
-import com.company.ReneSerulleU1Capstone.servicelayer.InventoryServiceLayer;
 import com.company.ReneSerulleU1Capstone.servicelayer.ServiceLayer;
 import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
 import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
@@ -18,8 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.management.InvalidAttributeValueException;
+import javax.naming.ServiceUnavailableException;
 import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
 import java.io.InvalidClassException;
 import java.math.BigDecimal;
 import java.util.List;
@@ -80,7 +74,7 @@ public class ItemPurchaseController {
     @RequestMapping(value = "/purchase", method = RequestMethod.POST)
     @ResponseStatus(code = HttpStatus.CREATED)
     public PurchaseViewModel addPurchase(@RequestBody @Valid PurchaseViewModel purchaseViewModel)
-            throws InvalidTypeIdException, InvalidAttributeValueException {
+            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException {
         return sl.add(purchaseViewModel);
     }
 
