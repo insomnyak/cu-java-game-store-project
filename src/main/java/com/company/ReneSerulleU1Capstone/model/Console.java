@@ -1,12 +1,11 @@
 package com.company.ReneSerulleU1Capstone.model;
 
+import com.company.ReneSerulleU1Capstone.servicelayer.ItemType;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.math.BigDecimal;
 import java.util.Objects;
 
 @JsonTypeName(ItemType.console)

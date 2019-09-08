@@ -1,8 +1,8 @@
 package com.company.ReneSerulleU1Capstone.model;
 
+import com.company.ReneSerulleU1Capstone.servicelayer.ItemType;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeId;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import javax.validation.constraints.Digits;

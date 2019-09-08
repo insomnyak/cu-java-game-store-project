@@ -1,7 +1,7 @@
 package com.company.ReneSerulleU1Capstone.viewmodel;
 
 import com.company.ReneSerulleU1Capstone.model.Item;
-import com.company.ReneSerulleU1Capstone.model.ItemType;
+import com.company.ReneSerulleU1Capstone.servicelayer.ItemType;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;

@@ -9,10 +9,9 @@ import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.management.InvalidAttributeValueException;
-import javax.swing.*;
+import javax.naming.ServiceUnavailableException;
 import java.io.InvalidClassException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -363,7 +362,8 @@ public class InventoryServiceLayerTest {
     // PurchaseViewModel: add, get, getAll
     @Test
     public void addGetGetAllPurchaseViewModels()
-            throws InvalidTypeIdException, InvalidClassException, InvalidAttributeValueException {
+            throws InvalidTypeIdException, InvalidClassException, InvalidAttributeValueException,
+            ServiceUnavailableException {
         PurchaseViewModel pvm1 = sl.add(purchaseViewModel1);
         PurchaseViewModel pvm2 = (PurchaseViewModel) sl.find(PurchaseViewModel.class, pvm1.getInvoiceId());
         assertEquals(pvm2, pvm1);
@@ -375,33 +375,35 @@ public class InventoryServiceLayerTest {
     // PurchaseViewModel > invalid quantity: expect error
     @Test(expected = IllegalArgumentException.class)
     public void addPurchaseViewModelWithInvalidQuantity() throws InvalidTypeIdException,
-            InvalidAttributeValueException {
+            InvalidAttributeValueException, ServiceUnavailableException {
         sl.add(purchaseViewModel4);
     }
 
     // PurchaseViewModel > invalid stateCode: expect error
     @Test(expected = NoSuchElementException.class)
     public void addPurchaseViewModelWithInvalidStateCode() throws InvalidTypeIdException,
-            InvalidAttributeValueException {
+            InvalidAttributeValueException, ServiceUnavailableException {
         sl.add(purchaseViewModel5);
     }
 
     // PurchaseViewModel > invalid itemType: expect error
     @Test(expected = InvalidTypeIdException.class)
     public void addPurchaseViewModelWithInvalidItemType() throws InvalidTypeIdException,
-            InvalidAttributeValueException {
+            InvalidAttributeValueException, ServiceUnavailableException {
         sl.add(purchaseViewModel6);
     }
 
     // PurchaseViewModel > invalid itemId: expect error
     @Test(expected = NoSuchElementException.class)
-    public void addPurchaseViewModelWithInvalidItemId() throws InvalidTypeIdException, InvalidAttributeValueException {
+    public void addPurchaseViewModelWithInvalidItemId()
+            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException {
         sl.add(purchaseViewModel7);
     }
 
     // PurchaseViewModel > invalid total (>999.99): expect error
     @Test(expected = InvalidAttributeValueException.class)
-    public void addPurchaseViewModelWithLargeTotal() throws InvalidTypeIdException, InvalidAttributeValueException {
+    public void addPurchaseViewModelWithLargeTotal()
+            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException {
         sl.add(purchaseViewModel8);
     }
 

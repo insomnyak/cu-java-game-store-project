@@ -5,9 +5,7 @@ import com.company.ReneSerulleU1Capstone.model.*;
 import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
 import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
 import com.company.ReneSerulleU1Capstone.viewmodel.SalesTaxRateViewModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
@@ -16,14 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
 
 import javax.management.InvalidAttributeValueException;
+import javax.naming.ServiceUnavailableException;
 import java.io.InvalidClassException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 @Controller @Primary
 public class ServiceLayer {
@@ -193,7 +188,8 @@ public class ServiceLayer {
     }
 
     @Transactional
-    public PurchaseViewModel add(PurchaseViewModel pvm) throws InvalidTypeIdException, InvalidAttributeValueException {
+    public PurchaseViewModel add(PurchaseViewModel pvm)
+            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException {
         String itemType = pvm.getItemType();
         Item item = find(itemType, pvm.getItemId());
 
@@ -260,7 +256,8 @@ public class ServiceLayer {
     }
 
     public void validateAttributeValues(PurchaseViewModel pvm, String itemType, Item item,
-                                        SalesTaxRate salesTaxRate, ProcessingFee processingFee) {
+                                        SalesTaxRate salesTaxRate, ProcessingFee processingFee)
+            throws ServiceUnavailableException {
         // BL: Order quantity must be > 0
         if (pvm.getQuantity() <= 0)
             throw new IllegalArgumentException(
@@ -275,11 +272,12 @@ public class ServiceLayer {
                             itemType, pvm.getItemId(), item.getQuantity()));
 
         // BL: Order must contain a valid state code
-        String state = pvm.getState().trim();
+        String state = pvm.getState().trim()
+                .replaceAll("[-+_]", " ").replace(".", "");
         String stateCode = "";
         if (state.length() > 2) {
             if (states == null || states.isEmpty()) {
-                throw new IllegalArgumentException("State value not valid. Please provide " +
+                throw new ServiceUnavailableException("State value not valid. Please provide " +
                         "the state code (a 2-letter abbreviation). " +
                         "NOTE: please use the /salesTaxRate service to get the list of accepted state codes.");
             }
