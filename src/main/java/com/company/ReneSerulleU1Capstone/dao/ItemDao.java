@@ -10,4 +10,5 @@ public interface ItemDao<T> {
     List<T> findAll();
     void update(T t);
     void delete(Long id);
+    Long countId(Long id);
 }

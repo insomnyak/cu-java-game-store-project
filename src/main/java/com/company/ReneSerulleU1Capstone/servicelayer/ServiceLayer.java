@@ -2,9 +2,7 @@ package com.company.ReneSerulleU1Capstone.servicelayer;
 
 import com.company.ReneSerulleU1Capstone.dao.*;
 import com.company.ReneSerulleU1Capstone.model.*;
-import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.SalesTaxRateViewModel;
+import com.company.ReneSerulleU1Capstone.viewmodel.*;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -46,7 +44,41 @@ public class ServiceLayer {
     }
 
     @Transactional
-    public void update(Item item) throws InvalidTypeIdException {
+    public void update(ItemViewModel item) throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
+        if (item instanceof GameViewModel) {
+            GameViewModel game = (GameViewModel) item;
+            if (game.getGameId() == null) {
+                throw new IllegalArgumentException("Invalid:gameId must not be null.");
+            }
+            if (gameDao.countId(game.getGameId()) == 0) {
+                throw new IllegalArgumentException("Invalid:gameId does not exist in the database.");
+            }
+            update(convertItemVmToDto(game));
+        } else if (item instanceof ConsoleViewModel) {
+            ConsoleViewModel console = (ConsoleViewModel) item;
+            if (console.getConsoleId() == null) {
+                throw new IllegalArgumentException("Invalid:consoleId must not be null.");
+            }
+            if (consoleDao.countId(console.getConsoleId()) == 0) {
+                throw new IllegalArgumentException("Invalid:consoleId does not exist in the database.");
+            }
+            update(convertItemVmToDto(console));
+        } else if (item instanceof TShirtViewModel) {
+            TShirtViewModel tShirt = (TShirtViewModel) item;
+            if (tShirt.gettShirtId() == null) {
+                throw new IllegalArgumentException("Invalid:tShirtId must not be null.");
+            }
+            if (tShirtDao.countId(tShirt.gettShirtId()) == 0) {
+                throw new IllegalArgumentException("Invalid:tShirtId does not exist in the database.");
+            }
+            update(convertItemVmToDto(tShirt));
+        } else {
+            throw invalidTypeIdException(item.getClass().getTypeName());
+        }
+    }
+
+    @Transactional
+    protected void update(Item item) throws InvalidTypeIdException {
         if (item instanceof Game) {
             gameDao.update((Game) item);
         } else if (item instanceof Console) {
@@ -58,7 +90,16 @@ public class ServiceLayer {
         }
     }
 
-    public Item find(String itemType, Long id) throws InvalidTypeIdException {
+    public ItemViewModel findItem(String itemType, Long id)
+            throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
+        Item item = find(itemType, id);
+        if (item == null) throw new NoSuchElementException(String.format(
+                "Item of type %s with id %s not found.", itemType, id));
+        return convertDtoToItemVM(item);
+    }
+
+    public Item find(String itemType, Long id)
+            throws InvalidTypeIdException {
         switch (itemType) {
             case ItemType.game:
                 return gameDao.find(id);
@@ -71,95 +112,137 @@ public class ServiceLayer {
         }
     }
 
-    public List<? extends  Item> findAll(String itemType) throws InvalidTypeIdException {
+    public List<ItemViewModel> findAll(String itemType)
+            throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
+        List<ItemViewModel> output = new ArrayList<>();
         switch (itemType) {
-            case ItemType.game:
-                return gameDao.findAll();
-            case ItemType.console:
-                return consoleDao.findAll();
-            case ItemType.tShirt:
-                return tShirtDao.findAll();
+            case ItemType.game: {
+                List<Game> games = gameDao.findAll();
+                output.addAll(convertListDtoToItemVM(games));
+                break;
+            }
+            case ItemType.console: {
+                List<Console> consoles = consoleDao.findAll();
+                output.addAll(convertListDtoToItemVM(consoles));
+                break;
+            }
+            case ItemType.tShirt: {
+                List<TShirt> tShirts = tShirtDao.findAll();
+                output.addAll(convertListDtoToItemVM(tShirts));
+                break;
+            }
             default:
                 throw invalidTypeIdException(itemType);
         }
+        return output;
     }
 
-    public List<? extends Item> findBy(String itemType, String attribute, String value)
-            throws InvalidTypeIdException {
+    public List<ItemViewModel> findBy(String itemType, String attribute, String value)
+            throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
+        List<ItemViewModel> output = new ArrayList<>();
         switch (itemType) {
             case ItemType.game:
                 switch (attribute.toLowerCase().trim()) {
-                    case "studio":
-                        return gameDao.findAllByStudio(value);
+                    case "studio": {
+                        List<Game> games = gameDao.findAllByStudio(value);
+                        output.addAll(convertListDtoToItemVM(games));
+                        break;
+                    }
                     case "esrbrating":
                     case "esrb rating":
                     case "esrb_rating":
                     case "esrb-rating":
-                    case "esrb+rating":
-                        return gameDao.findAllByEsrbRating(value);
-                    case "title":
-                        return gameDao.findAllByTitle(value);
+                    case "esrb+rating": {
+                        List<Game> games = gameDao.findAllByEsrbRating(value);
+                        output.addAll(convertListDtoToItemVM(games));
+                        break;
+                    }
+                    case "title": {
+                        List<Game> games = gameDao.findAllByTitle(value);
+                        output.addAll(convertListDtoToItemVM(games));
+                        break;
+                    }
                     default:
-                        throw illegalArgumentException(itemType, DtoSearchableAttributes.GAME.getList());
+                        throw illegalArgumentException(itemType, BLSettings.DTO_SEARCHABLE_ATTRIBUTES.GAME.toList());
                 }
+                break;
             case ItemType.console:
                 switch (attribute.toLowerCase().trim()) {
-                    case "manufacturer":
-                        return consoleDao.findAllByManufacturer(value);
+                    case "manufacturer": {
+                        List<Console> consoles = consoleDao.findAllByManufacturer(value);
+                        output.addAll(convertListDtoToItemVM(consoles));
+                        break;
+                    }
                     default:
-                        throw illegalArgumentException(itemType, DtoSearchableAttributes.CONSOLE.getList());
+                        throw illegalArgumentException(itemType, BLSettings.DTO_SEARCHABLE_ATTRIBUTES.CONSOLE.toList());
                 }
+                break;
             case ItemType.tShirt:
                 switch (attribute.toLowerCase().trim()) {
-                    case "color":
-                        return tShirtDao.findAllByColor(value);
-                    case "size":
-                        return tShirtDao.findAllBySize(value);
+                    case "color": {
+                        List<TShirt> tShirts = tShirtDao.findAllByColor(value);
+                        output.addAll(convertListDtoToItemVM(tShirts));
+                        break;
+                    }
+                    case "size": {
+                        List<TShirt> tShirts = tShirtDao.findAllBySize(value);
+                        output.addAll(convertListDtoToItemVM(tShirts));
+                        break;
+                    }
                     default:
-                        throw illegalArgumentException(itemType, DtoSearchableAttributes.T_SHIRTS.getList());
+                        throw illegalArgumentException(itemType, BLSettings.DTO_SEARCHABLE_ATTRIBUTES.T_SHIRTS.toList());
                 }
+                break;
             default:
                 throw invalidTypeIdException(itemType);
         }
+        return output;
     }
 
     public List<String> findSearchableAttributes(String itemType) throws InvalidTypeIdException {
         switch (itemType) {
             case ItemType.game:
-                return DtoSearchableAttributes.GAME.getList();
+                return BLSettings.DTO_SEARCHABLE_ATTRIBUTES.GAME.toList();
             case ItemType.console:
-                return DtoSearchableAttributes.CONSOLE.getList();
+                return BLSettings.DTO_SEARCHABLE_ATTRIBUTES.CONSOLE.toList();
             case ItemType.tShirt:
-                return DtoSearchableAttributes.T_SHIRTS.getList();
+                return BLSettings.DTO_SEARCHABLE_ATTRIBUTES.T_SHIRTS.toList();
             default:
                 throw invalidTypeIdException(itemType);
         }
     }
 
-    public List<?> findAll(Class className) throws InvalidClassException {
+    public List<?> findAll(Class className)
+            throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
+        List<PurchaseFee> output = new ArrayList<>();
         if (className.equals(ProcessingFeeViewModel.class)) {
-            return processingFeeDao.findAll();
+            List<ProcessingFee> processingFees = processingFeeDao.findAll();
+            output.addAll(convertListDtoToPurchaseFee(processingFees));
         } else if (className.equals(SalesTaxRateViewModel.class)) {
-            return salesTaxRateDao.findAll();
+            List<SalesTaxRate> salesTaxRates = salesTaxRateDao.findAll();
+            output.addAll(convertListDtoToPurchaseFee(salesTaxRates));
+        } else {
+            throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
         }
-        throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
+        return output;
     }
 
-    public Map<String, BigDecimal> findAllAsMap(Class className) throws InvalidClassException {
+    public Map<String, BigDecimal> findAllAsMap(Class className)
+            throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
         List<?> list = findAll(className);
         if (list == null || list.isEmpty()) throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-                "List not found. Please contact support");
+                String.format("List of type %s not found. Please contact support", className));
 
         Map<String, BigDecimal> map = new HashMap<>();
 
         if (className.equals(ProcessingFeeViewModel.class)) {
             list.stream().forEach(val -> {
-                ProcessingFee pf = (ProcessingFee) val;
+                ProcessingFee pf = (ProcessingFeeViewModel) val;
                 map.put(pf.getProductType(), pf.getFee());
             });
         } else if (className.equals(SalesTaxRateViewModel.class)) {
             list.stream().forEach(val -> {
-                SalesTaxRate str = (SalesTaxRate) val;
+                SalesTaxRate str = (SalesTaxRateViewModel) val;
                 map.put(str.getState(), str.getRate());
             });
         }
@@ -167,21 +250,22 @@ public class ServiceLayer {
         return map;
     }
 
-    public List<String> findAllProductTypes() throws InvalidClassException {
+    public List<String> findAllProductTypes()
+            throws InvalidClassException, InstantiationException, InvalidTypeIdException, IllegalAccessException {
         List<String> productTypes = new ArrayList<>();
         List<?> processingFees = findAll(ProcessingFeeViewModel.class);
         if (processingFees == null || processingFees.isEmpty())
             throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Processing Fee not found. Please contact support");
-        processingFees.forEach(pf -> productTypes.add(((ProcessingFee) pf).getProductType()));
+        processingFees.forEach(pf -> productTypes.add(((ProcessingFeeViewModel) pf).getProductType()));
         return productTypes;
     }
 
-    public Object find(Class className, Long id) throws InvalidTypeIdException, InvalidClassException {
+    public PurchaseViewModel find(Class className, Long id) throws InvalidTypeIdException, InvalidClassException {
         if (className.equals(PurchaseViewModel.class)) {
             Invoice invoice = invoiceDao.find(id);
             if (invoice == null)
-                throw new NoSuchElementException(String.format("Invoice id %d", id));
+                throw new NoSuchElementException(String.format("Invoice id %d not found.", id));
             return buildHelper(invoice);
         }
         throw invalidClassException(className, PurchaseViewModel.class);
@@ -189,7 +273,8 @@ public class ServiceLayer {
 
     @Transactional
     public PurchaseViewModel add(PurchaseViewModel pvm)
-            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException {
+            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException,
+            IllegalAccessException, InstantiationException {
         String itemType = pvm.getItemType();
         Item item = find(itemType, pvm.getItemId());
 
@@ -232,20 +317,22 @@ public class ServiceLayer {
         return pvm;
     }
 
-    public void setCalculatedAttributes(PurchaseViewModel pvm, Item item, SalesTaxRate salesTaxRate,
+    protected void setCalculatedAttributes(PurchaseViewModel pvm, Item item, SalesTaxRate salesTaxRate,
                                         ProcessingFee processingFee) throws InvalidAttributeValueException {
         BigDecimal unitPrice = item.getPrice();
         Long quantity = pvm.getQuantity();
         BigDecimal subtotal = unitPrice.multiply(new BigDecimal(quantity));
         BigDecimal tax = subtotal.multiply(salesTaxRate.getRate()).setScale(2, RoundingMode.HALF_UP);
-        BigDecimal fee = quantity <= BLSettings.MAX_QTY_BEFORE_EXTRA_FEE.getLong() ? processingFee.getFee() :
+
+        BigDecimal fee = quantity <= BLSettings.ADDITIONAL_FEES.MAX_QTY_BEFORE_EXTRA_PROCESSING_FEE.toLong() ?
+                processingFee.getFee() :
                 processingFee.getFee().add(
-                        BLSettings.FEE_QTY_GREATER_THAN_10.getValue());
+                        BLSettings.ADDITIONAL_FEES.PROCESSING_FEE_QTY_GREATER_THAN_10.toBigDecimal());
         BigDecimal total = subtotal.add(tax).add(fee);
 
-        if (total.compareTo(BLSettings.MAX_PURCHASE_TOTAL.getValue()) > 0) {
+        if (total.compareTo(BLSettings.MAX_PURCHASE_TOTAL.toBigDecimal()) > 0) {
             throw new InvalidAttributeValueException(String.format("Your total cannot exceed %s. " +
-                    "Please reduce your order quantity.", BLSettings.MAX_PURCHASE_TOTAL.getValue()));
+                    "Please reduce your order quantity.", BLSettings.MAX_PURCHASE_TOTAL.toBigDecimal()));
         }
 
         pvm.setUnitPrice(unitPrice);
@@ -255,7 +342,7 @@ public class ServiceLayer {
         pvm.setTotal(total);
     }
 
-    public void validateAttributeValues(PurchaseViewModel pvm, String itemType, Item item,
+    protected void validateAttributeValues(PurchaseViewModel pvm, String itemType, Item item,
                                         SalesTaxRate salesTaxRate, ProcessingFee processingFee)
             throws ServiceUnavailableException {
         // BL: Order quantity must be > 0
@@ -288,6 +375,7 @@ public class ServiceLayer {
                         "2) the full state name. "+
                         "NOTE: please use the /salesTaxRate service to get the list of accepted state codes.");
             }
+            pvm.setState(stateCode);
         } else if (state.length() == 2) {
             stateCode = state;
         }
@@ -320,7 +408,7 @@ public class ServiceLayer {
         processingFee.setFee(pf.getFee());
     }
 
-    public PurchaseViewModel buildHelper(Invoice invoice) throws InvalidTypeIdException {
+    protected PurchaseViewModel buildHelper(Invoice invoice) throws InvalidTypeIdException {
         PurchaseViewModel pvm = new PurchaseViewModel();
         pvm.setInvoiceId(invoice.getInvoiceId());
         pvm.setName(invoice.getName());
@@ -354,19 +442,95 @@ public class ServiceLayer {
         return pvm;
     }
 
-    public void matchObjectToClass(Class className, Object obj) {
+    protected List<ItemViewModel> convertListDtoToItemVM(List<?> list)
+            throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
+        List<ItemViewModel> output = new ArrayList<>();
+        if (list.isEmpty()) return output;
+
+        for (Object o : list) {
+            output.add(convertDtoToItemVM((Item) o));
+        }
+        return output;
+    }
+
+    protected ItemViewModel convertDtoToItemVM(Item item)
+            throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
+        Class className = item.getClass().getSimpleName().isEmpty() ? item.getClass().getSuperclass() : item.getClass();
+        if (className == Game.class) {
+            MapProperties<Game, GameViewModel> map = new MapProperties<>((Game) item, GameViewModel.class);
+            return map.mapFirstToSecond(false);
+        } else if (className == Console.class) {
+            MapProperties<Console, ConsoleViewModel> map = new MapProperties<>((Console) item,
+                    ConsoleViewModel.class);
+            return map.mapFirstToSecond(false);
+        } else if (className == TShirt.class) {
+            MapProperties<TShirt, TShirtViewModel> map = new MapProperties<>((TShirt) item,
+                    TShirtViewModel.class);
+            return map.mapFirstToSecond(false);
+        } else {
+            throw invalidTypeIdException(className.getTypeName());
+        }
+    }
+
+    protected Item convertItemVmToDto(ItemViewModel item)
+            throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
+        Class className = item.getClass();
+        if (className == GameViewModel.class) {
+            MapProperties<GameViewModel, Game> map = new MapProperties<>((GameViewModel) item, Game.class);
+            return map.mapFirstToSecond(false);
+        } else if (className == ConsoleViewModel.class) {
+            MapProperties<ConsoleViewModel, Console> map = new MapProperties<>((ConsoleViewModel) item,
+                    Console.class);
+            return map.mapFirstToSecond(false);
+        } else if (className == TShirtViewModel.class) {
+            MapProperties<TShirtViewModel, TShirt> map = new MapProperties<>((TShirtViewModel) item,
+                    TShirt.class);
+            return map.mapFirstToSecond(false);
+        } else {
+            throw invalidTypeIdException(className.getTypeName());
+        }
+    }
+
+    protected List<PurchaseFee> convertListDtoToPurchaseFee(List<?> list)
+            throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
+        List<PurchaseFee> output = new ArrayList<>();
+        if (list.isEmpty()) return output;
+
+        for (Object o : list) {
+            output.add(convertDtoToPurchaseFee(o));
+        }
+        return output;
+    }
+
+    protected PurchaseFee convertDtoToPurchaseFee(Object o)
+            throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
+        Class className = o.getClass().getSimpleName().isEmpty() ? o.getClass().getSuperclass() : o.getClass();
+        if (className == ProcessingFee.class) {
+            MapProperties<ProcessingFee, ProcessingFeeViewModel> map =
+                    new MapProperties<>((ProcessingFee) o, ProcessingFeeViewModel.class);
+            return map.mapFirstToSecond(false);
+        } else if (className == SalesTaxRate.class) {
+            MapProperties<SalesTaxRate, SalesTaxRateViewModel> map =
+                    new MapProperties<>((SalesTaxRate) o, SalesTaxRateViewModel.class);
+            return map.mapFirstToSecond(false);
+        } else {
+            throw invalidTypeIdException(className.getTypeName());
+        }
+    }
+
+    protected void matchObjectToClass(Class className, Object obj) {
         if (!obj.getClass().equals(className))
             throw new IllegalArgumentException(String.format("Object must be an instance of %s.",
                     className));
     }
 
-    public InvalidTypeIdException invalidTypeIdException(String itemType) {
+    protected InvalidTypeIdException invalidTypeIdException(String itemType) {
         return new InvalidTypeIdException(null, "Invalid.type: check $type value. " +
                 "Must adhere to the regex: " + ItemType.patternCaseSensitive,
                 null, itemType);
     }
 
-    public InvalidClassException invalidClassException(Class className, Class... supportedClasses) {
+    protected InvalidClassException invalidClassException(Class className, Class... supportedClasses) {
         String classes = "";
         if (supportedClasses != null && supportedClasses.length > 0) {
             classes += supportedClasses[0];
@@ -379,7 +543,7 @@ public class ServiceLayer {
                 classes.length() > 0 ? "Please use " + classes + "." : "No support classes provided."));
     }
 
-    public IllegalArgumentException illegalArgumentException(String itemType, List<String> acceptedValues) {
+    protected IllegalArgumentException illegalArgumentException(String itemType, List<String> acceptedValues) {
         StringBuilder values = new StringBuilder();
         int len = acceptedValues.size();
         for (int i = 0; i < len; i++) {
@@ -392,6 +556,5 @@ public class ServiceLayer {
         return new IllegalArgumentException(
                 String.format("Invalid values for %s. Please select from: %s", itemType, values.toString()));
     }
-
 
 }

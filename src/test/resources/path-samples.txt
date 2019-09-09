@@ -1,0 +1,205 @@
+Tests
+
+1) GET /itemType
+
+2) GET /salesTaxRate
+
+3) GET /processingFee
+
+4) GET /item/{type}
+   GET /item/Games
+   GET /item/Consoles
+   GET /item/T-Shirts
+
+6) GET item/{type}/{id}
+   GET /item/T-Shirts/24
+   GET /item/Consoles/1
+   GET /item/Game/1
+
+7) GET item/{type}/{attribute}/{value}
+   GET /item/Games/esrb+rating/string
+   GET /item/Games/studio/string
+   GET /item/Games/title/Final%20Fantasy
+   GET /item/Consoles/Manufacturer/sony
+   GET /item/T-Shirts/color/string
+   GET /item/T-Shirts/size/string
+
+8) POST /item/inventory
+    SAMPLE DATA:
+    [
+        {
+            "$type": "Games",
+            "title": "Final Fantasy",
+            "esrbRating": "Everyone",
+            "description": "rpg",
+            "studio": "Square Enix",
+            "quantity": 55,
+            "price": 15.99
+        },
+        {
+            "$type": "Consoles",
+            "model": "PS4",
+            "manufacturer": "Sony",
+            "memoryAmount": "2TB",
+            "processor": "1.6 GHz",
+            "quantity": 12,
+            "price": 334.5
+        },
+        {
+            "$type": "T-Shirts",
+            "size": "L",
+            "color": "Black",
+            "description": "Game of Thrones",
+            "quantity": 32,
+            "price": 12.99
+        }
+    ]
+
+9) PUT /item/inventory
+    [
+        {
+            "$type": "Games",
+            "title": "Final Fantasy",
+            "esrbRating": "Everyone",
+            "description": "rpg",
+            "studio": "Square Enix",
+            "quantity": 50,
+            "price": 15.99,
+            "gameId": 4
+        },
+        {
+            "$type": "Consoles",
+            "model": "PS4",
+            "manufacturer": "Sony",
+            "memoryAmount": "2TB",
+            "processor": "1.6 GHz",
+            "quantity": 25,
+            "price": 334.5,
+            "consoleId": 4
+        },
+        {
+            "$type": "T-Shirts",
+            "size": "L",
+            "color": "Black",
+            "description": "Game of Thrones",
+            "quantity": 30,
+            "price": 12.99,
+            "tShirtId": 4
+        }
+    ]
+
+10) DELETE /item/{type}/inventory/{id}
+    DELETE /item/T-Shirts/inventory/1
+    DELETE /item/Games/inventory/1
+    DELETE /item/Consoles/inventory/1
+
+11) POST /purchase
+    SAMPLE1:
+    {
+        "name": "rene",
+        "street": "55th",
+        "city": "nyc",
+        "state": "north carolina",
+        "zipcode": "12344",
+        "itemType": "T-Shirts",
+        "itemId": 3,
+        "quantity": 2
+    }
+
+    SAMPLE2:
+    {
+        "name": "rene",
+        "street": "55th",
+        "city": "nyc",
+        "state": "north carolina",
+        "zipcode": "10019",
+        "itemType": "Games",
+        "itemId": 3,
+        "quantity": 2
+    }
+
+    SAMPLE 3:
+    {
+        "name": "René",
+        "street": "Madison Square Garden",
+        "city": "Manhattan",
+        "state": "New York",
+        "zipcode": "10025",
+        "itemType": "Consoles",
+        "itemId": 3,
+        "quantity": 2
+    }
+
+    SAMPLE 4:
+    {
+        "name": "René",
+        "street": "Madison Square Garden",
+        "city": "Manhattan",
+        "state": "New York",
+        "zipcode": "10025",
+        "itemType": "Games",
+        "itemId": 4,
+        "quantity": 15
+    }
+
+12) GET /purchase/invoice
+
+13) GET /purchase/invoice/{id}
+    GET /purchase/invoice/99
+
+14) POST /inventory/fee
+    SAMPLE:
+    [
+        {
+            "$type": "Processing Fee",
+            "productType": "string",
+            "fee": 0
+        },
+        {
+            "$type": "Sales Tax Rate",
+            "state": "NY",
+            "rate": 0.15
+        },
+        {
+            "$type": "Processing Fee",
+            "productType": "string2",
+            "fee": 1
+        },
+        {
+            "$type": "Processing Fee",
+            "productType": "string2",
+            "fee": 2
+        },
+        {
+            "$type": "Sales Tax Rate",
+            "state": "NY",
+            "rate": 0.05
+        }
+    ]
+
+15) PUT /inventory/fee
+    SAMPLE:
+    {
+        "asdf": {
+            "$type": "Processing Fee",
+            "productType": "string",
+            "fee": 24.32
+        },
+        "string2": {
+            "$type": "Processing Fee",
+            "productType": "string2",
+            "fee": 41.33
+        }
+    }
+
+16) GET /inventory/{feeType}
+    GET /inventory/processingFee
+    GET /inventory/salesTaxRate
+
+17) GET /inventory/{feeType}/{value}
+    GET /inventory/processingFee/Games
+    GET /inventory/salesTaxRate/NY
+
+18) DELETE /inventory/{feeType}/{value}
+    DELETE /inventory/processingFee/string
+    DELETE /inventory/salesTaxRate/PR
