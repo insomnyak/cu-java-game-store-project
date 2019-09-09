@@ -282,7 +282,7 @@ paths:
             schema:
               $ref: '#/components/schemas/FeeTypes'
       responses:
-        '201':
+        '207':
           description: successful request. New fees created or updated.
           content:
             application/json:

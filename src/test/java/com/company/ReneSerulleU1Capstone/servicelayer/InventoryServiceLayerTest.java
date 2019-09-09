@@ -2,9 +2,7 @@ package com.company.ReneSerulleU1Capstone.servicelayer;
 
 import com.company.ReneSerulleU1Capstone.dao.*;
 import com.company.ReneSerulleU1Capstone.model.*;
-import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.SalesTaxRateViewModel;
+import com.company.ReneSerulleU1Capstone.viewmodel.*;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.junit.After;
 import org.junit.Before;
@@ -34,11 +32,12 @@ public class InventoryServiceLayerTest {
     InventoryServiceLayer sl;
 
     // add, get
-    private Game game1a;
+    private GameViewModel game1a;
     private Game game1b;
-    private Console console1a;
+    private GameViewModel game1bVM;
+    private ConsoleViewModel console1a;
     private Console console1b;
-    private TShirt tShirt1a;
+    private TShirtViewModel tShirt1a;
     private TShirt tShirt1b;
     private ProcessingFee processingFee1;
     private ProcessingFee processingFee2;
@@ -56,13 +55,13 @@ public class InventoryServiceLayerTest {
     private Invoice invoice3b;
 
     // update
-    private Game game2a;
+    private GameViewModel game2a;
     private Game game2b;
     private Game game2c;
-    private Console console2a;
+    private ConsoleViewModel console2a;
     private Console console2b;
     private Console console2c;
-    private TShirt tShirt2a;
+    private TShirtViewModel tShirt2a;
     private TShirt tShirt2b;
     private TShirt tShirt2c;
     private ProcessingFee processingFee4a;
@@ -167,7 +166,8 @@ public class InventoryServiceLayerTest {
 
     // Processing Fee > Product Type: get list
     @Test
-    public void findAllProductTypes() throws InvalidClassException {
+    public void findAllProductTypes()
+            throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
         List<String> productTypes = new ArrayList<>();
         productTypes = sl.findAllProductTypes();
         assertEquals(productTypes.size(), 3);
@@ -175,13 +175,14 @@ public class InventoryServiceLayerTest {
 
     // SalesTaxRate: add, find, findAll, update, delete
     @Test
-    public void addGetGetAllUpdateDeleteSalesTaxRates() throws InvalidClassException {
+    public void addGetGetAllUpdateDeleteSalesTaxRates()
+            throws InvalidClassException, InstantiationException, IllegalAccessException, InvalidTypeIdException {
         SalesTaxRateViewModel s1 = new SalesTaxRateViewModel();
         s1.setState("NY");
         s1.setRate(new BigDecimal(0.05).setScale(2, RoundingMode.HALF_UP));
         sl.add(SalesTaxRateViewModel.class, s1);
 
-        SalesTaxRate str1 = (SalesTaxRate) sl.find(SalesTaxRateViewModel.class, "NY");
+        PurchaseFee str1 = sl.find(SalesTaxRateViewModel.class, "NY");
         assertEquals(str1, s1);
 
         s1 = new SalesTaxRateViewModel();
@@ -189,7 +190,7 @@ public class InventoryServiceLayerTest {
         s1.setRate(new BigDecimal(0.05).setScale(2, RoundingMode.HALF_UP));
         sl.add(SalesTaxRateViewModel.class, s1);
 
-        str1 = (SalesTaxRate) sl.find(SalesTaxRateViewModel.class, "HI");
+        str1 = sl.find(SalesTaxRateViewModel.class, "HI");
         assertEquals(str1, s1);
 
         List<?> salesTaxRates= sl.findAll(SalesTaxRateViewModel.class);
@@ -204,7 +205,7 @@ public class InventoryServiceLayerTest {
         s1.setRate(new BigDecimal(0.06).setScale(2, RoundingMode.HALF_UP));
         sl.update(SalesTaxRateViewModel.class, s1, "FL");
 
-        str1 = (SalesTaxRate) sl.find(SalesTaxRateViewModel.class, "FL");
+        str1 = sl.find(SalesTaxRateViewModel.class, "FL");
         assertEquals(str1, s1);
 
         sl.delete(SalesTaxRateViewModel.class, "ZZ");
@@ -213,27 +214,28 @@ public class InventoryServiceLayerTest {
 
     // Processing Fee: add, find, findAll, update, delete
     @Test
-    public void addGetGetAllUpdateDeleteProcessingFees() throws InvalidClassException {
+    public void addGetGetAllUpdateDeleteProcessingFees()
+            throws InvalidClassException, InstantiationException, IllegalAccessException, InvalidTypeIdException {
         ProcessingFeeViewModel p1 = new ProcessingFeeViewModel();
         p1.setProductType("Consoles");
         p1.setFee(new BigDecimal(14.99).setScale(2, RoundingMode.HALF_UP));
         sl.add(ProcessingFeeViewModel.class, p1);
 
-        ProcessingFee p2 = (ProcessingFee) sl.find(ProcessingFeeViewModel.class, "Consoles");
+        PurchaseFee p2 = sl.find(ProcessingFeeViewModel.class, "Consoles");
         assertEquals(p2, p1);
 
         p1.setProductType("T-Shirts");
         p1.setFee(new BigDecimal(1.98).setScale(2, RoundingMode.HALF_UP));
         sl.add(ProcessingFeeViewModel.class, p1);
 
-        p2 = (ProcessingFee) sl.find(ProcessingFeeViewModel.class, "T-Shirts");
+        p2 = sl.find(ProcessingFeeViewModel.class, "T-Shirts");
         assertEquals(p2, p1);
 
         p1.setProductType("Games");
         p1.setFee(new BigDecimal(1.49).setScale(2, RoundingMode.HALF_UP));
         sl.add(ProcessingFeeViewModel.class, p1);
 
-        p2 = (ProcessingFee) sl.find(ProcessingFeeViewModel.class, "Games");
+        p2 = sl.find(ProcessingFeeViewModel.class, "Games");
         assertEquals(p2, p1);
 
         List<?> fees = sl.findAll(ProcessingFeeViewModel.class);
@@ -246,25 +248,25 @@ public class InventoryServiceLayerTest {
 
         p1.setProductType("Games");
         p1.setFee(new BigDecimal(1.49).setScale(2, RoundingMode.HALF_UP));
-        p2 = (ProcessingFee) sl.find(ProcessingFeeViewModel.class, "Games");
+        p2 = sl.find(ProcessingFeeViewModel.class, "Games");
         assertEquals(p2, p1);
 
         sl.delete(ProcessingFeeViewModel.class, "Candy");
-        p2 = (ProcessingFee) sl.find(ProcessingFeeViewModel.class, "Candy");
+        p2 = sl.find(ProcessingFeeViewModel.class, "Candy");
         assertNull(p2);
     }
 
     // ItemType == Games: add, find, findAll, update, delete
     @Test
-    public void addGetGetAllUpdateDeleteGames() throws InvalidTypeIdException {
-        Game g1 = (Game) sl.add(game1a);
+    public void addGetGetAllUpdateDeleteGames()
+            throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
+        GameViewModel g1 = (GameViewModel) sl.add(game1a);
         Game g2 = (Game) sl.find(ItemType.game, g1.getGameId());
 
         assertEquals(g2, g1);
 
-        List<? extends Item> games = sl.findAll(ItemType.game);
+        List<ItemViewModel> games = sl.findAll(ItemType.game);
         assertEquals(games.size(), 1);
-        assertEquals(games.get(0).getClass(), Game.class);
 
         games = sl.findBy(ItemType.game, "title", g1.getTitle());
         assertEquals(games.size(), 1);
@@ -284,9 +286,9 @@ public class InventoryServiceLayerTest {
         games = sl.findBy(ItemType.game, "esrb+rating", "random");
         assertEquals(games.size(), 0);
 
-        g1 = (Game) sl.add(game2a);
+        g1 = (GameViewModel) sl.add(game2a);
         g1.setQuantity(4L);
-        sl.update(g1);
+        sl.update((ItemViewModel) g1);
         g2 = (Game) sl.find(ItemType.game, g1.getGameId());
         assertEquals(g2, g1);
 
@@ -297,15 +299,15 @@ public class InventoryServiceLayerTest {
 
     // ItemType == Consoles: add, find, findAll, update, delete
     @Test
-    public void addGetGetAllUpdateDeleteConsoles() throws InvalidTypeIdException {
-        Console c1 = (Console) sl.add(console1a);
+    public void addGetGetAllUpdateDeleteConsoles()
+            throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
+        ConsoleViewModel c1 = (ConsoleViewModel) sl.add(console1a);
         Console c2 = (Console) sl.find("Consoles", c1.getConsoleId());
 
         assertEquals(c2, c1);
 
-        List<? extends Item> consoles = sl.findAll("Consoles");
+        List<ItemViewModel> consoles = sl.findAll("Consoles");
         assertEquals(consoles.size(), 1);
-        assertEquals(consoles.get(0).getClass(), Console.class);
 
         consoles = sl.findBy("Consoles", "manufacturer", "Sony");
         assertEquals(consoles.size(), 1);
@@ -313,9 +315,9 @@ public class InventoryServiceLayerTest {
         consoles = sl.findBy("Consoles", "manufacturer", "Blizzard");
         assertEquals(consoles.size(), 0);
 
-        c1 = (Console) sl.add(console2a);
+        c1 = (ConsoleViewModel) sl.add(console2a);
         c1.setQuantity(53L);
-        sl.update(c1);
+        sl.update((ItemViewModel) c1);
         c2 = (Console) sl.find("Consoles", c1.getConsoleId());
         assertEquals(c2, c1);
 
@@ -326,14 +328,14 @@ public class InventoryServiceLayerTest {
 
     // ItemType == T-Shirts: add, find, findAll, update, delete
     @Test
-    public void addGetGetAllUpdateDeleteTShirts() throws InvalidTypeIdException {
-        TShirt t1 = (TShirt) sl.add(tShirt1a);
-        TShirt t2 = (TShirt) sl.find("T-Shirts", t1.getTShirtId());
+    public void addGetGetAllUpdateDeleteTShirts()
+            throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
+        TShirtViewModel t1 = (TShirtViewModel) sl.add(tShirt1a);
+        TShirt t2 = (TShirt) sl.find("T-Shirts", t1.gettShirtId());
         assertEquals(t2, t1);
 
-        List<? extends Item> tShirts = sl.findAll("T-Shirts");
+        List<ItemViewModel> tShirts = sl.findAll("T-Shirts");
         assertEquals(tShirts.size(), 1);
-        assertEquals(tShirts.get(0).getClass(), TShirt.class);
 
         tShirts = sl.findBy("T-Shirts", "Size", "L");
         assertEquals(tShirts.size(), 1);
@@ -347,11 +349,11 @@ public class InventoryServiceLayerTest {
         tShirts = sl.findBy("T-Shirts", "Size", "Blue");
         assertEquals(tShirts.size(), 0);
 
-        t1 = (TShirt) sl.add(tShirt2a);
+        t1 = (TShirtViewModel) sl.add(tShirt2a);
         t1.setDescription("Jumanji");
         t1.setQuantity(20L);
-        sl.update(t1);
-        t2 = (TShirt) sl.find("T-Shirts", t1.getTShirtId());
+        sl.update((ItemViewModel) t1);
+        t2 = (TShirt) sl.find("T-Shirts", t1.gettShirtId());
         assertEquals(t2, t1);
 
         sl.delete("T-Shirts", 3L);
@@ -363,7 +365,7 @@ public class InventoryServiceLayerTest {
     @Test
     public void addGetGetAllPurchaseViewModels()
             throws InvalidTypeIdException, InvalidClassException, InvalidAttributeValueException,
-            ServiceUnavailableException {
+            ServiceUnavailableException, InstantiationException, IllegalAccessException {
         PurchaseViewModel pvm1 = sl.add(purchaseViewModel1);
         PurchaseViewModel pvm2 = (PurchaseViewModel) sl.find(PurchaseViewModel.class, pvm1.getInvoiceId());
         assertEquals(pvm2, pvm1);
@@ -375,35 +377,40 @@ public class InventoryServiceLayerTest {
     // PurchaseViewModel > invalid quantity: expect error
     @Test(expected = IllegalArgumentException.class)
     public void addPurchaseViewModelWithInvalidQuantity() throws InvalidTypeIdException,
-            InvalidAttributeValueException, ServiceUnavailableException {
+            InvalidAttributeValueException, ServiceUnavailableException, InstantiationException,
+            IllegalAccessException {
         sl.add(purchaseViewModel4);
     }
 
     // PurchaseViewModel > invalid stateCode: expect error
     @Test(expected = NoSuchElementException.class)
     public void addPurchaseViewModelWithInvalidStateCode() throws InvalidTypeIdException,
-            InvalidAttributeValueException, ServiceUnavailableException {
+            InvalidAttributeValueException, ServiceUnavailableException, InstantiationException,
+            IllegalAccessException {
         sl.add(purchaseViewModel5);
     }
 
     // PurchaseViewModel > invalid itemType: expect error
     @Test(expected = InvalidTypeIdException.class)
     public void addPurchaseViewModelWithInvalidItemType() throws InvalidTypeIdException,
-            InvalidAttributeValueException, ServiceUnavailableException {
+            InvalidAttributeValueException, ServiceUnavailableException, InstantiationException,
+            IllegalAccessException {
         sl.add(purchaseViewModel6);
     }
 
     // PurchaseViewModel > invalid itemId: expect error
     @Test(expected = NoSuchElementException.class)
     public void addPurchaseViewModelWithInvalidItemId()
-            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException {
+            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException,
+            InstantiationException, IllegalAccessException {
         sl.add(purchaseViewModel7);
     }
 
     // PurchaseViewModel > invalid total (>999.99): expect error
     @Test(expected = InvalidAttributeValueException.class)
     public void addPurchaseViewModelWithLargeTotal()
-            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException {
+            throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException,
+            InstantiationException, IllegalAccessException {
         sl.add(purchaseViewModel8);
     }
 
@@ -425,6 +432,7 @@ public class InventoryServiceLayerTest {
         doReturn(null).when(consoleDao).find(3L);
         doReturn(consoles1).when(consoleDao).findAll();
         doReturn(emptyList).when(consoleDao).findAllByManufacturer("Blizzard");
+        doReturn(1L).when(consoleDao).countId(2L);
     }
 
     public void setUpGameDaoMock() {
@@ -449,6 +457,7 @@ public class InventoryServiceLayerTest {
         doReturn(game2c).when(gameDao).find(2L);
         doNothing().when(gameDao).delete(3L);
         doReturn(null).when(gameDao).find(3L);
+        doReturn(1L).when(gameDao).countId(2L);
     }
 
     public void setUpTShirtDaoMock() {
@@ -471,6 +480,7 @@ public class InventoryServiceLayerTest {
         doReturn(tShirt2c).when(tShirtDao).find(2L);
         doNothing().when(tShirtDao).delete(3L);
         doReturn(null).when(tShirtDao).find(3L);
+        doReturn(1L).when(tShirtDao).countId(2L);
     }
 
     public void setUpProcessingFeeDaoMock() {
@@ -532,11 +542,12 @@ public class InventoryServiceLayerTest {
 
     public void constructSampleData() {
         // add, get
-        game1a = new Game();
+        game1a = new GameViewModel();
         game1b = new Game();
-        console1a = new Console();
+        game1bVM = new GameViewModel();
+        console1a = new ConsoleViewModel();
         console1b = new Console();
-        tShirt1a = new TShirt();
+        tShirt1a = new TShirtViewModel();
         tShirt1b = new TShirt();
         processingFee1 = new ProcessingFee();
         processingFee2 = new ProcessingFee();
@@ -554,13 +565,13 @@ public class InventoryServiceLayerTest {
         invoice3b = new Invoice();
 
         // update
-        game2a = new Game();
+        game2a = new GameViewModel();
         game2b = new Game();
         game2c = new Game();
-        console2a = new Console();
+        console2a = new ConsoleViewModel();
         console2b = new Console();
         console2c = new Console();
-        tShirt2a = new TShirt();
+        tShirt2a = new TShirtViewModel();
         tShirt2b = new TShirt();
         tShirt2c = new TShirt();
         processingFee4a = new ProcessingFee();
@@ -602,6 +613,14 @@ public class InventoryServiceLayerTest {
         game1b.setPrice(new BigDecimal(25.99).setScale(2, RoundingMode.HALF_UP));
         game1b.setStudio("Square Enix");
         game1b.setQuantity(15L);
+
+        game1bVM.setGameId(1L);
+        game1bVM.setTitle("Final Fantasy VIII");
+        game1bVM.setEsrbRating("A+");
+        game1bVM.setDescription("rpg");
+        game1bVM.setPrice(new BigDecimal(25.99).setScale(2, RoundingMode.HALF_UP));
+        game1bVM.setStudio("Square Enix");
+        game1bVM.setQuantity(15L);
 
         game2a.setTitle("Final Fantasy XV");
         game2a.setEsrbRating("A+");
@@ -670,7 +689,7 @@ public class InventoryServiceLayerTest {
         tShirt1a.setPrice(new BigDecimal(19.99).setScale(2, RoundingMode.HALF_UP));
         tShirt1a.setQuantity(25L);
 
-        tShirt1b.setTShirtId(1L);
+        tShirt1b.settShirtId(1L);
         tShirt1b.setSize("L");
         tShirt1b.setColor("Black");
         tShirt1b.setDescription("Game of Thrones");
@@ -683,14 +702,14 @@ public class InventoryServiceLayerTest {
         tShirt2a.setPrice(new BigDecimal(19.99).setScale(2, RoundingMode.HALF_UP));
         tShirt2a.setQuantity(25L);
 
-        tShirt2b.setTShirtId(2L);
+        tShirt2b.settShirtId(2L);
         tShirt2b.setSize("L");
         tShirt2b.setColor("Navy");
         tShirt2b.setDescription("Game of Thrones");
         tShirt2b.setPrice(new BigDecimal(19.99).setScale(2, RoundingMode.HALF_UP));
         tShirt2b.setQuantity(25L);
 
-        tShirt2c.setTShirtId(2L);
+        tShirt2c.settShirtId(2L);
         tShirt2c.setSize("L");
         tShirt2c.setColor("Navy");
         tShirt2c.setDescription("Jumanji");

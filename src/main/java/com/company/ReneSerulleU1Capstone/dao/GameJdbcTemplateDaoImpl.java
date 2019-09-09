@@ -31,6 +31,8 @@ public class GameJdbcTemplateDaoImpl implements GameDao {
             "select * from game where esrb_rating = ?";
     private final String SELECT_ALL_GAMES_BY_TITLE_SQL =
             "select * from game where title = ?";
+    private final String COUNT_ID_SQL =
+            "select count(*) from game where game_id = ?";
 
     JdbcTemplate jdbcTemplate;
 
@@ -98,6 +100,11 @@ public class GameJdbcTemplateDaoImpl implements GameDao {
     @Override
     public List<Game> findAllByTitle(String title) {
         return jdbcTemplate.query(SELECT_ALL_GAMES_BY_TITLE_SQL, this::mapRowToGame, title);
+    }
+
+    @Override
+    public Long countId(Long id) {
+        return jdbcTemplate.queryForObject(COUNT_ID_SQL, Long.class, id);
     }
 
     @Override

@@ -1,25 +1,13 @@
 package com.company.ReneSerulleU1Capstone.model;
 
-import com.company.ReneSerulleU1Capstone.servicelayer.ItemType;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
-@JsonIgnoreProperties(ignoreUnknown = true, value = {"$type"})
-@JsonTypeInfo(use=JsonTypeInfo.Id.NAME, include=JsonTypeInfo.As.PROPERTY, property = "$type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = Console.class, name = ItemType.console),
-        @JsonSubTypes.Type(value = Game.class, name = ItemType.game),
-        @JsonSubTypes.Type(value = TShirt.class, name = ItemType.tShirt)
-})
 public abstract class Item {
 
-    private String $type;
+    //private String $type;
 
     @NotNull
     @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
@@ -48,11 +36,11 @@ public abstract class Item {
         this.quantity = quantity;
     }
 
-    public String get$type() {
-        return $type;
-    }
-
-    public void set$type(String $type) {
-        this.$type = $type;
-    }
+//    public String get$type() {
+//        return $type;
+//    }
+//
+//    public void set$type(String $type) {
+//        this.$type = $type;
+//    }
 }

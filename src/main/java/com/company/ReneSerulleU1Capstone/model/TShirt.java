@@ -1,14 +1,10 @@
 package com.company.ReneSerulleU1Capstone.model;
 
-import com.company.ReneSerulleU1Capstone.servicelayer.ItemType;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.Objects;
 
-@JsonTypeName(ItemType.tShirt)
 public class TShirt extends Item {
 
     @Digits(integer = 11, fraction = 0, message = "Invalid quantity. Must be a whole number up to 11 digits long.")
@@ -25,6 +21,14 @@ public class TShirt extends Item {
     @NotBlank(message = "Invalid description: cannot be empty or blank.")
     @Size(max = 255, message = "Invalid description: must not be longer than 255 characters.")
     private String description;
+
+    public Long gettShirtId() {
+        return tShirtId;
+    }
+
+    public void settShirtId(Long tShirtId) {
+        this.tShirtId = tShirtId;
+    }
 
     public Long getTShirtId() {
         return tShirtId;
@@ -63,7 +67,7 @@ public class TShirt extends Item {
         if (this == o) return true;
         if (!(o instanceof TShirt)) return false;
         TShirt tShirt = (TShirt) o;
-        return Objects.equals(getTShirtId(), tShirt.getTShirtId()) &&
+        return Objects.equals(gettShirtId(), tShirt.gettShirtId()) &&
                 getSize().equals(tShirt.getSize()) &&
                 getColor().equals(tShirt.getColor()) &&
                 getDescription().equals(tShirt.getDescription()) &&
@@ -73,6 +77,6 @@ public class TShirt extends Item {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getTShirtId(), getSize(), getColor(), getDescription(), getPrice(), getQuantity());
+        return Objects.hash(gettShirtId(), getSize(), getColor(), getDescription(), getPrice(), getQuantity());
     }
 }

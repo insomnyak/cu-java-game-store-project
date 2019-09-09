@@ -27,6 +27,8 @@ public class ConsoleJdbcTemplateDaoImpl implements ConsoleDao {
             "delete from console where console_id = ?";
     private final String SELECT_ALL_CONSOLES_BY_MANUFACTURER_SQL =
             "select * from console where manufacturer = ?";
+    private final String COUNT_ID_SQL =
+            "select count(*) from console where console_id = ?";
 
     JdbcTemplate jdbcTemplate;
 
@@ -79,6 +81,11 @@ public class ConsoleJdbcTemplateDaoImpl implements ConsoleDao {
     @Override
     public void delete(Long consoleId) {
         jdbcTemplate.update(DELETE_CONSOLE_SQL, consoleId);
+    }
+
+    @Override
+    public Long countId(Long id) {
+        return jdbcTemplate.queryForObject(COUNT_ID_SQL, Long.class, id);
     }
 
     @Override

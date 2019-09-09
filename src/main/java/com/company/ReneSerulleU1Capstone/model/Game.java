@@ -1,12 +1,8 @@
 package com.company.ReneSerulleU1Capstone.model;
 
-import com.company.ReneSerulleU1Capstone.servicelayer.ItemType;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-
 import javax.validation.constraints.*;
 import java.util.Objects;
 
-@JsonTypeName(ItemType.game)
 public class Game extends Item {
 
     @Digits(integer = 11, fraction = 0, message = "Invalid gameId. Must be a whole number up to 11 digits long.")

@@ -1,11 +1,8 @@
 package com.company.ReneSerulleU1Capstone.controller;
 
-import com.company.ReneSerulleU1Capstone.model.Item;
+import com.company.ReneSerulleU1Capstone.servicelayer.FeeType;
 import com.company.ReneSerulleU1Capstone.servicelayer.InventoryServiceLayer;
-import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseFee;
-import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.SalesTaxRateViewModel;
+import com.company.ReneSerulleU1Capstone.viewmodel.*;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,13 +25,15 @@ public class ItemInventoryController {
 
     @RequestMapping(value = "/item/inventory", method = RequestMethod.POST)
     @ResponseStatus(code = HttpStatus.CREATED)
-    public List<Item> addItems(@RequestBody @Valid List<Item> items) throws InvalidTypeIdException {
+    public List<ItemViewModel> addItems(@RequestBody @Valid List<ItemViewModel> items)
+            throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
         return sl.add(items);
     }
 
     @RequestMapping(value = "/item/inventory", method = RequestMethod.PUT)
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void updateItems(@RequestBody @Valid List<Item> items) throws InvalidTypeIdException {
+    public void updateItems(@RequestBody @Valid List<ItemViewModel> items)
+            throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
         sl.update(items);
     }
 
@@ -46,12 +45,13 @@ public class ItemInventoryController {
 
     @RequestMapping(value = "/purchase/invoice", method = RequestMethod.GET)
     @ResponseStatus(code = HttpStatus.OK)
-    public List<?> findAllInvoices() throws InvalidClassException {
+    public List<?> findAllInvoices()
+            throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
         return sl.findAll(PurchaseViewModel.class);
     }
 
     @RequestMapping(value = "/inventory/fee", method = RequestMethod.POST)
-    @ResponseStatus(code = HttpStatus.CREATED)
+    @ResponseStatus(code = HttpStatus.MULTI_STATUS)
     public List<?> addFees(@RequestBody ArrayList<PurchaseFee> purchaseFees) throws InvalidClassException {
         return sl.add(purchaseFees);
     }
@@ -65,47 +65,22 @@ public class ItemInventoryController {
 
     @RequestMapping(value = "/inventory/{feeType}", method = RequestMethod.GET)
     @ResponseStatus(code = HttpStatus.OK)
-    public List<?> findAllFeeType(@PathVariable @Pattern(regexp = "^processingFee|salesTaxRate$") String feeType)
-            throws InvalidClassException {
-        switch (feeType) {
-            case "processingFee":
-                return sl.findAll(ProcessingFeeViewModel.class);
-            case "salesTaxRate":
-                return sl.findAll(SalesTaxRateViewModel.class);
-            default:
-                throw new IllegalArgumentException("Invalid feeType. Must be processingFee or salesTaxRate");
-        }
+    public List<?> findAllFeeType(@PathVariable @Pattern(regexp = FeeType.pathRegex) String feeType)
+            throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
+        return sl.findAllFeeType(feeType);
     }
 
     @RequestMapping(value = "/inventory/{feeType}/{value}", method = RequestMethod.GET)
     @ResponseStatus(code = HttpStatus.OK)
-    public Object findFeeTypeOfValue(@PathVariable @Pattern(regexp = "^processingFee|salesTaxRate$") String feeType,
-                                      @PathVariable String value)
-            throws InvalidClassException {
-        switch (feeType) {
-            case "processingFee":
-                return sl.find(ProcessingFeeViewModel.class, value);
-            case "salesTaxRate":
-                return sl.find(SalesTaxRateViewModel.class, value);
-            default:
-                throw new IllegalArgumentException("Invalid feeType. Must be processingFee or salesTaxRate");
-        }
+    public Object findFeeTypeOfValue(@PathVariable String feeType, @PathVariable String value)
+            throws InvalidClassException, InstantiationException, IllegalAccessException {
+        return sl.findFeeType(feeType, value);
     }
 
     @RequestMapping(value = "/inventory/{feeType}/{value}", method = RequestMethod.DELETE)
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void deleteFeeTypeOfValue(@PathVariable @Pattern(regexp = "^processingFee|salesTaxRate$") String feeType,
-                                     @PathVariable String value)
+    public void deleteFeeTypeOfValue(@PathVariable String feeType, @PathVariable String value)
             throws InvalidClassException {
-        switch (feeType) {
-            case "processingFee":
-                sl.delete(ProcessingFeeViewModel.class, value);
-                break;
-            case "salesTaxRate":
-                sl.delete(SalesTaxRateViewModel.class, value);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid feeType. Must be processingFee or salesTaxRate");
-        }
+        sl.deleteFeeType(feeType, value);
     }
 }

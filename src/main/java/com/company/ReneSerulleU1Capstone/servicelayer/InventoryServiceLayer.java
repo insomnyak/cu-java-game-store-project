@@ -2,10 +2,7 @@ package com.company.ReneSerulleU1Capstone.servicelayer;
 
 import com.company.ReneSerulleU1Capstone.dao.*;
 import com.company.ReneSerulleU1Capstone.model.*;
-import com.company.ReneSerulleU1Capstone.viewmodel.ProcessingFeeViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseFee;
-import com.company.ReneSerulleU1Capstone.viewmodel.PurchaseViewModel;
-import com.company.ReneSerulleU1Capstone.viewmodel.SalesTaxRateViewModel;
+import com.company.ReneSerulleU1Capstone.viewmodel.*;
 import com.fasterxml.jackson.databind.exc.InvalidTypeIdException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -13,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InvalidClassException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -31,29 +27,40 @@ public class InventoryServiceLayer extends ServiceLayer {
     }
 
     @Transactional
-    public List<Item> add(List<Item> items) throws InvalidTypeIdException {
-        List<Item> addedItems = new ArrayList<>();
-        for (Item item : items) {
+    public List<ItemViewModel> add(List<ItemViewModel> items)
+            throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
+        List<ItemViewModel> addedItems = new ArrayList<>();
+        for (ItemViewModel item : items) {
             addedItems.add(add(item));
         }
         return addedItems;
     }
 
     @Transactional
-    public Item add(Item item) throws InvalidTypeIdException {
-        if (item instanceof Game) {
-            return gameDao.add((Game) item);
+    public ItemViewModel add(ItemViewModel item) throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
+        if (item instanceof GameViewModel) {
+            GameViewModel gameVM = (GameViewModel) item;
+            Game newGame =  gameDao.add((Game) convertItemVmToDto(item));
+            gameVM.setGameId(newGame.getGameId());
+            return gameVM;
         } else if (item instanceof Console) {
-            return consoleDao.add((Console) item);
+            ConsoleViewModel consoleVM = (ConsoleViewModel) item;
+            Console newConsole = consoleDao.add((Console) convertItemVmToDto(item));
+            consoleVM.setConsoleId(newConsole.getConsoleId());
+            return consoleVM;
         } else if (item instanceof TShirt) {
-            return tShirtDao.add((TShirt) item);
+            TShirtViewModel tshirtVM = (TShirtViewModel) item;
+            TShirt newTShirt = tShirtDao.add((TShirt) convertItemVmToDto(item));
+            tshirtVM.settShirtId(newTShirt.gettShirtId());
+            return tshirtVM;
         }
         throw invalidTypeIdException(item.getClass().getTypeName());
     }
 
     @Transactional
-    public void update(List<Item> items) throws InvalidTypeIdException {
-        for (Item item : items) {
+    public void update(List<ItemViewModel> items) throws InvalidTypeIdException, IllegalAccessException,
+            InstantiationException {
+        for (ItemViewModel item : items) {
             update(item);
         }
     }
@@ -75,17 +82,50 @@ public class InventoryServiceLayer extends ServiceLayer {
         }
     }
 
-    public Object find(Class className, String value) throws InvalidClassException {
+    public PurchaseFee findFeeType(String pathFeeType, String lookupValue)
+            throws IllegalAccessException, InvalidClassException, InstantiationException {
+        for (Map.Entry<String, Class> feeType : FeeType.paths.entrySet()) {
+            if (pathFeeType.equals(feeType.getKey())) {
+                return find(feeType.getValue(), lookupValue);
+            }
+        }
+        throw new IllegalArgumentException(String.format("Invalid feeType. Must be one of: %s",
+                FeeType.paths.keySet().toString()));
+    }
+
+
+    public PurchaseFee find(Class className, String value)
+            throws InvalidClassException, IllegalAccessException, InstantiationException {
         if (className.equals(ProcessingFeeViewModel.class)) {
-            return processingFeeDao.find(value);
+            ProcessingFee pf = processingFeeDao.find(value);
+            if (pf == null) return null;
+            MapProperties<ProcessingFee, ProcessingFeeViewModel> map =
+                    new MapProperties<>(pf, ProcessingFeeViewModel.class);
+            return map.mapFirstToSecond(false);
         } else if (className.equals(SalesTaxRateViewModel.class)) {
-            return salesTaxRateDao.find(value);
+            SalesTaxRate str = salesTaxRateDao.find(value);
+            if (str == null) return null;
+            MapProperties<SalesTaxRate, SalesTaxRateViewModel> map =
+                    new MapProperties<>(str, SalesTaxRateViewModel.class);
+            return map.mapFirstToSecond(false);
         }
         throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
     }
 
+    public List<?> findAllFeeType(String pathFeeType)
+            throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
+        for (Map.Entry<String, Class> feeType : FeeType.paths.entrySet()) {
+            if (pathFeeType.equals(feeType.getKey())) {
+                return findAll(feeType.getValue());
+            }
+        }
+        throw new IllegalArgumentException(String.format("Invalid feeType. Must be one of: %s",
+                FeeType.paths.keySet().toString()));
+    }
+
     @Override
-    public List<?> findAll(Class className) throws InvalidClassException {
+    public List<?> findAll(Class className) throws InvalidClassException, IllegalAccessException,
+            InstantiationException, InvalidTypeIdException {
         try {
             return super.findAll(className);
         } catch (InvalidClassException ignore) {}
@@ -164,6 +204,21 @@ public class InventoryServiceLayer extends ServiceLayer {
     }
 
     @Transactional
+    public void deleteFeeType(String pathFeeType, String lookupValue) throws InvalidClassException {
+        boolean isValidFeeType = false;
+        for (Map.Entry<String, Class> feeType : FeeType.paths.entrySet()) {
+            if (pathFeeType.equals(feeType.getKey())) {
+                isValidFeeType = true;
+                delete(feeType.getValue(), lookupValue);
+            }
+        }
+        if (!isValidFeeType) {
+            throw new IllegalArgumentException(String.format("Invalid feeType. Must be one of: %s",
+                    FeeType.paths.keySet().toString()));
+        }
+    }
+
+    @Transactional
     public void delete(Class className, String value) throws InvalidClassException {
         if (className.equals(ProcessingFeeViewModel.class)) {
             processingFeeDao.delete(value);
@@ -172,5 +227,16 @@ public class InventoryServiceLayer extends ServiceLayer {
         }   else {
             throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
         }
+    }
+
+    protected List<Item> convertListItemVMtoDto(List<ItemViewModel> list)
+            throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
+        List<Item> output = new ArrayList<>();
+        if (list.isEmpty()) return output;
+
+        for (Object o : list) {
+            output.add(convertItemVmToDto((ItemViewModel) o));
+        }
+        return output;
     }
 }

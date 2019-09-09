@@ -36,7 +36,7 @@ public class TShirtJdbcTemplateDaoImplTest {
     @Before
     public void setUp() throws Exception {
         List<TShirt> tShirts = tShirtDao.findAll();
-        tShirts.forEach(tShirt -> tShirtDao.delete(tShirt.getTShirtId()));
+        tShirts.forEach(tShirt -> tShirtDao.delete(tShirt.gettShirtId()));
     }
 
     @After
@@ -89,7 +89,7 @@ public class TShirtJdbcTemplateDaoImplTest {
         tShirt1.setQuantity(40L);
         tShirtDao.update(tShirt1);
 
-        TShirt tShirt2 = tShirtDao.find(tShirt1.getTShirtId());
+        TShirt tShirt2 = tShirtDao.find(tShirt1.gettShirtId());
         assertEquals(tShirt2, tShirt1);
     }
 
@@ -106,12 +106,12 @@ public class TShirtJdbcTemplateDaoImplTest {
         tShirtDao.add(tShirt1);
 
         // test get
-        TShirt tShirt2 = tShirtDao.find(tShirt1.getTShirtId());
+        TShirt tShirt2 = tShirtDao.find(tShirt1.gettShirtId());
         assertEquals(tShirt2, tShirt1);
 
         // test delete
-        tShirtDao.delete(tShirt1.getTShirtId());
-        tShirt2 = tShirtDao.find(tShirt1.getTShirtId());
+        tShirtDao.delete(tShirt1.gettShirtId());
+        tShirt2 = tShirtDao.find(tShirt1.gettShirtId());
         assertNull(tShirt2);
     }
 

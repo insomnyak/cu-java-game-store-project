@@ -28,6 +28,8 @@ public class TShirtJdbcTemplateDaoImpl implements TShirtDao {
             "select * from t_shirt where color = ?";
     private final String SELECT_ALL_T_SHIRTS_BY_SIZE_SQL =
             "select * from t_shirt where size = ?";
+    private final String COUNT_ID_SQL =
+            "select count(*) from t_shirt where t_shirt_id = ?";
 
     JdbcTemplate jdbcTemplate;
 
@@ -46,7 +48,7 @@ public class TShirtJdbcTemplateDaoImpl implements TShirtDao {
                 tShirt.getPrice(),
                 tShirt.getQuantity());
         Long id = jdbcTemplate.queryForObject("select last_insert_id()", Long.class);
-        tShirt.setTShirtId(id);
+        tShirt.settShirtId(id);
         return tShirt;
     }
 
@@ -72,12 +74,17 @@ public class TShirtJdbcTemplateDaoImpl implements TShirtDao {
                 tShirt.getDescription(),
                 tShirt.getPrice(),
                 tShirt.getQuantity(),
-                tShirt.getTShirtId());
+                tShirt.gettShirtId());
     }
 
     @Override
     public void delete(Long tShirtId) {
         jdbcTemplate.update(DELETE_T_SHIRT_SQL, tShirtId);
+    }
+
+    @Override
+    public Long countId(Long id) {
+        return jdbcTemplate.queryForObject(COUNT_ID_SQL, Long.class, id);
     }
 
     @Override
@@ -93,7 +100,7 @@ public class TShirtJdbcTemplateDaoImpl implements TShirtDao {
     @Override
     public TShirt mapRowToTShirt(ResultSet rs, int rowNum) throws SQLException {
         TShirt t = new TShirt() {{
-            setTShirtId(rs.getLong("t_shirt_id"));
+            settShirtId(rs.getLong("t_shirt_id"));
             setSize(rs.getString("size"));
             setColor(rs.getString("color"));
             setDescription(rs.getString("description"));
