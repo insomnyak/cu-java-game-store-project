@@ -19,6 +19,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * RestController for paths related to the purchase of an item
+ *
+ * see /test/resources/path-samples.txt for sample paths and data for testing on Postman
+ */
 @RestController
 @Validated
 public class ItemPurchaseController {
@@ -85,7 +90,8 @@ public class ItemPurchaseController {
 
     @RequestMapping(value = "/purchase/invoice/{id}", method = RequestMethod.GET)
     @ResponseStatus(code = HttpStatus.OK)
-    public PurchaseViewModel getPurchase(@PathVariable Long id) throws InvalidTypeIdException, InvalidClassException {
+    public PurchaseViewModel getPurchase(@PathVariable Long id)
+            throws InvalidTypeIdException, InvalidClassException, IllegalAccessException, InstantiationException {
         return sl.find(PurchaseViewModel.class, id);
     }
 

@@ -9,10 +9,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InvalidClassException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This service layer inherits from the Primary Service Layer. It contains additional methods related to
+ * the store management.
+ */
 @Controller
 public class InventoryServiceLayer extends ServiceLayer {
 
@@ -26,6 +31,16 @@ public class InventoryServiceLayer extends ServiceLayer {
         super(gameDao, consoleDao, tShirtDao, processingFeeDao, salesTaxRateDao, invoiceDao);
     }
 
+    /**
+     * Methods adds a list of object that implement {@link ItemViewModel} to the database.
+     * @param items
+     * @return return the list of newly added objects to the database along with the respective new ids.
+     * @throws InvalidTypeIdException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     *
+     * @see #add(ItemViewModel): helper method
+     */
     @Transactional
     public List<ItemViewModel> add(List<ItemViewModel> items)
             throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
@@ -40,23 +55,32 @@ public class InventoryServiceLayer extends ServiceLayer {
     public ItemViewModel add(ItemViewModel item) throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
         if (item instanceof GameViewModel) {
             GameViewModel gameVM = (GameViewModel) item;
-            Game newGame =  gameDao.add((Game) convertItemVmToDto(item));
+            Game newGame =  gameDao.add((Game) convertItemViewModelToDto(item));
             gameVM.setGameId(newGame.getGameId());
             return gameVM;
         } else if (item instanceof Console) {
             ConsoleViewModel consoleVM = (ConsoleViewModel) item;
-            Console newConsole = consoleDao.add((Console) convertItemVmToDto(item));
+            Console newConsole = consoleDao.add((Console) convertItemViewModelToDto(item));
             consoleVM.setConsoleId(newConsole.getConsoleId());
             return consoleVM;
         } else if (item instanceof TShirt) {
             TShirtViewModel tshirtVM = (TShirtViewModel) item;
-            TShirt newTShirt = tShirtDao.add((TShirt) convertItemVmToDto(item));
+            TShirt newTShirt = tShirtDao.add((TShirt) convertItemViewModelToDto(item));
             tshirtVM.settShirtId(newTShirt.gettShirtId());
             return tshirtVM;
         }
         throw invalidTypeIdException(item.getClass().getTypeName());
     }
 
+    /**
+     * Updates multiple object that implement {@link ItemViewModel}.
+     * @param items
+     * @throws InvalidTypeIdException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     *
+     * @see #update(Item): helper method
+     */
     @Transactional
     public void update(List<ItemViewModel> items) throws InvalidTypeIdException, IllegalAccessException,
             InstantiationException {
@@ -82,7 +106,18 @@ public class InventoryServiceLayer extends ServiceLayer {
         }
     }
 
-    public PurchaseFee findFeeType(String pathFeeType, String lookupValue)
+    /**
+     * Returns a an object that implements {@link PurchaseFeeViewModel}.
+     * @param pathFeeType: the type of fee: i.e. processingFee, salesTaxRate
+     * @param lookupValue: the value to find
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvalidClassException
+     * @throws InstantiationException
+     *
+     * @see #find(Class, String): helper method that connects to data layer
+     */
+    public PurchaseFeeViewModel findFeeType(String pathFeeType, String lookupValue)
             throws IllegalAccessException, InvalidClassException, InstantiationException {
         for (Map.Entry<String, Class> feeType : FeeType.paths.entrySet()) {
             if (pathFeeType.equals(feeType.getKey())) {
@@ -94,7 +129,7 @@ public class InventoryServiceLayer extends ServiceLayer {
     }
 
 
-    public PurchaseFee find(Class className, String value)
+    public PurchaseFeeViewModel find(Class className, String value)
             throws InvalidClassException, IllegalAccessException, InstantiationException {
         if (className.equals(ProcessingFeeViewModel.class)) {
             ProcessingFee pf = processingFeeDao.find(value);
@@ -137,7 +172,7 @@ public class InventoryServiceLayer extends ServiceLayer {
             invoices.forEach(invoice -> {
                 try {
                     pvms.add(buildHelper(invoice));
-                } catch (InvalidTypeIdException ignore) {}
+                } catch (InvalidTypeIdException | IllegalAccessException | InstantiationException ignore) {}
             });
             return pvms;
         }
@@ -145,10 +180,19 @@ public class InventoryServiceLayer extends ServiceLayer {
                 PurchaseViewModel.class);
     }
 
+    /**
+     * Adds fees that implement {@link PurchaseFeeViewModel} to the database. If any exist, an update is
+     *      performed instead.
+     * @param purchaseFees
+     * @return
+     * @throws InvalidClassException
+     *
+     * @see #add(Class, Object): helper method that executes the DAO statements
+     */
     @Transactional
-    public List<?> add(ArrayList<PurchaseFee> purchaseFees) throws InvalidClassException {
+    public List<?> add(ArrayList<PurchaseFeeViewModel> purchaseFees) throws InvalidClassException {
         List<Object> purchaseFees1 = new ArrayList<>();
-        for (PurchaseFee purchaseFee : purchaseFees) {
+        for (PurchaseFeeViewModel purchaseFee : purchaseFees) {
             purchaseFees1.add(add(purchaseFee.getClass(), purchaseFee));
         }
         return purchaseFees1;
@@ -183,9 +227,17 @@ public class InventoryServiceLayer extends ServiceLayer {
         throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
     }
 
+    /**
+     * Method updates a fee. The key is the original value to find in the Database. the value is the object with
+     *      the update parameters that will be used to set the respective tuple in the DB.
+     * @param purchaseFeeMap
+     * @throws InvalidClassException
+     *
+     * @see #update(Class, Object, String): helper method that executes the DAO statements.
+     */
     @Transactional
-    public void update(Map<String, PurchaseFee> purchaseFeeMap) throws InvalidClassException {
-        for (Map.Entry<String, PurchaseFee> entry : purchaseFeeMap.entrySet()) {
+    public void update(Map<String, PurchaseFeeViewModel> purchaseFeeMap) throws InvalidClassException {
+        for (Map.Entry<String, PurchaseFeeViewModel> entry : purchaseFeeMap.entrySet()) {
             update(entry.getValue().getClass(), entry.getValue(), entry.getKey());
         }
     }
@@ -203,6 +255,15 @@ public class InventoryServiceLayer extends ServiceLayer {
         }
     }
 
+    /**
+     * Deletes a fee of specificed pathFeeType and lookupValue.
+     * @param pathFeeType
+     * @param lookupValue
+     * @throws InvalidClassException
+     *
+     * @see FeeType#paths: the pathFeeType must be defined in this Class variable.
+     * @see #delete(Class, String): helper method that executes DAO statements.
+     */
     @Transactional
     public void deleteFeeType(String pathFeeType, String lookupValue) throws InvalidClassException {
         boolean isValidFeeType = false;
@@ -235,8 +296,88 @@ public class InventoryServiceLayer extends ServiceLayer {
         if (list.isEmpty()) return output;
 
         for (Object o : list) {
-            output.add(convertItemVmToDto((ItemViewModel) o));
+            output.add(convertItemViewModelToDto((ItemViewModel) o));
         }
         return output;
+    }
+
+    public void resetFeeType(String pathFeeType) {
+        boolean isValidFeeType = false;
+        switch (pathFeeType) {
+            case FeeType.pathProcessingFee:
+                resetProcessingFeeTable();
+                break;
+            case FeeType.pathSalesTaxRate:
+                resetSalesTaxRateTable();
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("Invalid feeType. Must be one of: %s",
+                        FeeType.paths.keySet().toString()));
+        }
+    }
+
+    protected void resetSalesTaxRateTable() {
+        List<SalesTaxRate> salesTaxRates = salesTaxRateDao.findAll();
+        salesTaxRates.forEach(salesTaxRate -> salesTaxRateDao.delete(salesTaxRate.getState()));
+
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("AL"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("AK"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("AZ"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("AR"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("CA"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("CO"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("CT"); setRate(new BigDecimal(0.03)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("DE"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("FL"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("GA"); setRate(new BigDecimal(0.07)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("HI"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("ID"); setRate(new BigDecimal(0.03)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("IL"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("IN"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("IA"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("KS"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("KY"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("LA"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("ME"); setRate(new BigDecimal(0.03)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("MD"); setRate(new BigDecimal(0.07)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("MA"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("MI"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("MN"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("MS"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("MO"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("MT"); setRate(new BigDecimal(0.03)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("NE"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("NV"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("NH"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("NJ"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("NM"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("NY"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("NC"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("ND"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("OH"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("OK"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("OR"); setRate(new BigDecimal(0.07)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("PA"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("RI"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("SC"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("SD"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("TN"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("TX"); setRate(new BigDecimal(0.03)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("UT"); setRate(new BigDecimal(0.04)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("VT"); setRate(new BigDecimal(0.07)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("VA"); setRate(new BigDecimal(0.06)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("WA"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("WV"); setRate(new BigDecimal(0.05)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("WI"); setRate(new BigDecimal(0.03)); }});
+        salesTaxRateDao.add(new SalesTaxRate() {{ setState("WY"); setRate(new BigDecimal(0.04)); }});
+    }
+
+    protected void resetProcessingFeeTable() {
+        List<ProcessingFee> processingFees = processingFeeDao.findAll();
+        processingFees.forEach(processingFee -> processingFeeDao.delete(processingFee.getProductType()));
+
+        processingFeeDao.add(new ProcessingFee() {{ setProductType("Consoles"); setFee(new BigDecimal(14.99)); }});
+        processingFeeDao.add(new ProcessingFee() {{ setProductType("T-Shirts"); setFee(new BigDecimal(1.98)); }});
+        processingFeeDao.add(new ProcessingFee() {{ setProductType("Games"); setFee(new BigDecimal(1.49)); }});
     }
 }

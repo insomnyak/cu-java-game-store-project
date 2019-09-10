@@ -203,3 +203,6 @@ Tests
 18) DELETE /inventory/{feeType}/{value}
     DELETE /inventory/processingFee/string
     DELETE /inventory/salesTaxRate/PR
+
+19) PUT /inventory/processingFee/reset
+    PUT /inventory/salesTaxRate/reset

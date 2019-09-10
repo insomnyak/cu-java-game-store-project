@@ -16,6 +16,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * RestController for paths related to the management of store inventory and settings (such as updating tax rates)
+ *
+ * see /test/resources/path-samples.txt for sample paths and data for testing on Postman
+ */
 @RestController
 @Validated
 public class ItemInventoryController {
@@ -52,13 +57,13 @@ public class ItemInventoryController {
 
     @RequestMapping(value = "/inventory/fee", method = RequestMethod.POST)
     @ResponseStatus(code = HttpStatus.MULTI_STATUS)
-    public List<?> addFees(@RequestBody ArrayList<PurchaseFee> purchaseFees) throws InvalidClassException {
+    public List<?> addFees(@RequestBody ArrayList<PurchaseFeeViewModel> purchaseFees) throws InvalidClassException {
         return sl.add(purchaseFees);
     }
 
     @RequestMapping(value = "/inventory/fee", method = RequestMethod.PUT)
     @ResponseStatus(code = HttpStatus.NO_CONTENT)
-    public void updateFeesMap(@RequestBody Map<String, PurchaseFee> purchaseFeeMap)
+    public void updateFeesMap(@RequestBody Map<String, PurchaseFeeViewModel> purchaseFeeMap)
             throws InvalidClassException {
         sl.update(purchaseFeeMap);
     }
@@ -82,5 +87,11 @@ public class ItemInventoryController {
     public void deleteFeeTypeOfValue(@PathVariable String feeType, @PathVariable String value)
             throws InvalidClassException {
         sl.deleteFeeType(feeType, value);
+    }
+
+    @RequestMapping(value = "/inventory/{feeType}/reset", method = RequestMethod.PUT)
+    @ResponseStatus(code = HttpStatus.NO_CONTENT)
+    public void resetFeeType(@PathVariable String feeType) {
+        sl.resetFeeType(feeType);
     }
 }
