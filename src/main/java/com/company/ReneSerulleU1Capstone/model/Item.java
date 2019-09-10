@@ -5,9 +5,10 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
+/**
+ * Abstract class for store items.
+ */
 public abstract class Item {
-
-    //private String $type;
 
     @NotNull
     @Digits(integer = 3, fraction = 2, message = "Invalid subtotal. Can contain up to 5 digits, " +
@@ -36,11 +37,4 @@ public abstract class Item {
         this.quantity = quantity;
     }
 
-//    public String get$type() {
-//        return $type;
-//    }
-//
-//    public void set$type(String $type) {
-//        this.$type = $type;
-//    }
 }

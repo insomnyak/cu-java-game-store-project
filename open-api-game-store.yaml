@@ -4,7 +4,7 @@ info:
   description: Rene Serulle U1 Capstone. This is a REST Inventory Management Web Service for a Video Game Store
   contact:
     email: rene+GameStoreSupport@insomnyak.com
-  version: 0.1.0
+  version: 0.1.2
 servers:
   - url: 'http://localhost:8080'
     description: local dev server
@@ -20,6 +20,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ItemTypes'
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
   /salesTaxRate:
     get:
       summary: returns Tax Rates and State Code for every State in which this Game Store conducts business
@@ -29,7 +31,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SalesTaxRate'
+                $ref: '#/components/schemas/SalesTaxRateMap'
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
   /processingFee:
     get:
       summary: returns each Item Type and its respective processing fee
@@ -39,7 +43,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProcessingFee'
+                $ref: '#/components/schemas/ProcessingFeeMap'
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
 
   /item/{type}:
     get:
@@ -58,6 +64,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Items'
+        '422':
+          $ref: '#/paths/~itemType' # path variable value is not supported. Use this path to get the list of accepted values.
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
 
   /item/{type}/{id}:
     get:
@@ -88,6 +98,10 @@ paths:
           description: Bad Request
         '404':
           description: Id not found
+        '422':
+          $ref: '#/paths/~itemType' # path variable value is not supported. Use this path to get the list of accepted values.
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
 
   /item/{type}/attributes:
     get:
@@ -106,6 +120,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Attributes'
+        '422':
+          $ref: '#/paths/~itemType' # path variable value is not supported. Use this path to get the list of accepted values.
 
   /item/{type}/{attribute}/{value}:
     get:
@@ -140,6 +156,10 @@ paths:
           description: Bad Request
         '404':
           description: Id not found
+        '422':
+          $ref: '#/paths/~itemType' # path variable value is not supported. Use this path to get the list of accepted values.
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
 
   /item/inventory:
     post:
@@ -163,6 +183,8 @@ paths:
           description: Missing a field
         '415':
           description: Unsupported media type, the request body should be json
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
     put:
       summary: updates an existing item(s)
       parameters:
@@ -183,10 +205,14 @@ paths:
           description: the item was successfully updated
         '400':
           description: Bad Request
+        '404':
+          description: Id not found
         '422':
           description: Missing a field
         '415':
           description: Unsupported media type, the request body should be json
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
 
   /item/{type}/inventory/{id}:
     delete:
@@ -211,8 +237,8 @@ paths:
           description: delete successful
         '400':
           description: Bad Request
-        '404':
-          description: Id not found
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
 
   /purchase:
     post:
@@ -236,6 +262,10 @@ paths:
           description: Missing a field
         '415':
           description: Unsupported media type, the request body should be json
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
+        '503':
+          description: thrown if processing the full state name is not currently available. Use the state 2-letter code instead
 
   /purchase/invoice:
     get:
@@ -249,6 +279,8 @@ paths:
                 $ref: '#/components/schemas/Purchase'
         '404':
           description: invoices not found
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
 
   /purchase/invoice/{id}:
     get:
@@ -269,6 +301,145 @@ paths:
                 $ref: '#/components/schemas/Purchase'
         '404':
           description: invoice not found
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
+
+  /inventory/fee:
+    post:
+      summary: add new fees. If a fee already exists, an update is performed instead.
+      description: note that adding new fees are not recommended before first creating a ticket with the development team. If you create a new productType and fee, please work with dev-ops so this productType is added to the Business Layer. If not, your customers will not be able to use the new option. You also would not be able to add Items for this new productType.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeeTypes'
+      responses:
+        '207':
+          description: successful request. New fees created or updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeTypes'
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
+        '503':
+          description: thrown is full state name provided, but service to map state to a stateCode is not available
+    put:
+      summary: updates existing fees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeeTypeMap'
+      responses:
+        '204':
+          description: the fees were successfully updated
+        '400':
+          description: Bad Request
+        '422':
+          description: Missing a field
+        '415':
+          description: Unsupported media type, the request body should be json
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
+
+  /inventory/{feeType}:
+    get:
+      summary: returns all available fees of specified type
+      parameters:
+        - name: feeType
+          in: path
+          required: true
+          description: The type of fee
+          schema:
+            type: string
+            example: possibles values are 'processingFee' or 'salesTaxRate'
+      responses:
+        '200':
+          description: List of all fees of specified type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeType'
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
+
+  /inventory/{feeType}/{value}:
+    get:
+      summary: returns the fee or specified type and value.
+      parameters:
+        - name: feeType
+          in: path
+          required: true
+          description: The type of fee
+          schema:
+            type: string
+            example: possibles values are 'processingFee' or 'salesTaxRate'
+        - name: value
+          in: path
+          required: true
+          description: the value to search for.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: found the fee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeeType'
+        '404':
+          description: fee not found
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
+    delete:
+      summary: deletes a fee of specified type with the given value
+      parameters:
+        - name: feeType
+          in: path
+          required: true
+          description: The type of fee
+          schema:
+            type: string
+            example: possibles values are 'processingFee' or 'salesTaxRate'
+        - name: value
+          in: path
+          required: true
+          description: The value to search for
+          schema:
+            type: string
+      responses:
+        '204':
+          description: delete successful
+        '400':
+          description: Bad Request
+        '404':
+          description: Id not found
+        '500':
+          description: uncaught server error. i.e. Class failed to instantiate. Class method/field were inaccessible.
+
+  /inventory/{feeType}/reset:
+    put:
+      summary: updates existing fees
+      parameters:
+        - name: feeType
+          in: path
+          required: true
+          description: The type of fee
+          schema:
+            type: string
+            example: possibles values are 'processingFee' or 'salesTaxRate'
+      responses:
+        '204':
+          description: the fees were successfully reset
 
 components:
   schemas:
@@ -277,7 +448,7 @@ components:
       properties:
         '$type':
           type: string
-          description: value must be 'Game'
+          description: value must be 'Games'
         gameId:
           type: integer
           maxLength: 11
@@ -299,7 +470,7 @@ components:
           maxLength: 11
         price:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
       required:
         - '$type'
         - title
@@ -313,25 +484,31 @@ components:
       properties:
         '$type':
           type: string
-          description: value must be 'Console'
+          description: value must be 'Consoles'
         consoledId:
           type: integer
           maxLength: 11
         model:
           type: string
+          minLength: 1
+          maxLength: 50
         manufacturer:
           type: string
+          minLength: 1
+          maxLength: 50
         memoryAmount:
           type: string
+          maxLength: 20
         processor:
           type: string
+          maxLength: 20
         quantity:
           type: integer
           minimum: 1
           maxLength: 11
         price:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
       required:
         - '$type'
         - model
@@ -343,23 +520,29 @@ components:
       properties:
         '$type':
           type: string
-          description: value must be 'TShirt'
+          description: value must be 'T-Shirts'
         tShirtId:
           type: integer
           maxLength: 11
         size:
           type: string
+          minLength: 1
+          maxLength: 20
         color:
           type: string
+          minLength: 1
+          maxLength: 20
         description:
           type: string
+          minLength: 1
+          maxLength: 255
         quantity:
           type: integer
           minimum: 1
           maxLength: 11
         price:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
       required:
         - '$type'
         - size
@@ -385,14 +568,53 @@ components:
       type: array
       items:
         type: string
-    SalesTaxRate:
+    SalesTaxRateMap:
+      type: object
+      additionalProperties:
+        type: string
+    ProcessingFeeMap:
       type: object
       additionalProperties:
         type: string
     ProcessingFee:
       type: object
+      properties:
+        '$type':
+          type: string
+          description: value must be 'Processing Fee'
+        productType:
+          type: string
+          minLength: 1
+          maxLength: 20
+        fee:
+          type: number
+          pattern: '[0-9]{2}[.][0-9]{2}'
+    SalesTaxRate:
+      type: object
+      properties:
+        '$type':
+          type: string
+          description: value must be 'Sales Tax Rate'
+        state:
+          type: string
+          pattern: '[A-Z]{2}'
+        rate:
+          type: number
+          pattern: '[0-9]{1}[.][0-9]{2}'
+    FeeType:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/ProcessingFee'
+        - $ref: '#/components/schemas/SalesTaxRate'
+    FeeTypes:
+      type: array
+      items:
+        $ref: '#/components/schemas/FeeType'
+    FeeTypeMap:
+      type: object
+      description: key is the lookup value that will be used to find the Fee. If the lookup value changed, the the key is the original value.
       additionalProperties:
-        type: string
+        $ref: '#/components/schemas/FeeType'
     Purchase:
       type: object
       properties:
@@ -411,6 +633,7 @@ components:
         state:
           type: string
           maxLength: 30
+          description: The state should be the 2-letter abbreviation of the state. However, the service does allow the full state name as well. The service replaces [-+_] with a space character. It replaces periods with a blank character.
         zipcode:
           type: string
           maxLength: 5
@@ -424,23 +647,23 @@ components:
           maxLength: 11
         unitPrice:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
         quantity:
           type: integer
           minimum: 1
           maxLength: 11
         subtotal:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
         tax:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
         processingFee:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
         total:
           type: number
-          format: '#####.##'
+          pattern: '[0-9]{3}[.][0-9]{2}'
       required:
         - name
         - street

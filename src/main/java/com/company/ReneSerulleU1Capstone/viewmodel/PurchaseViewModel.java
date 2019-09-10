@@ -32,11 +32,10 @@ public class PurchaseViewModel {
     @Size(max = 5, message = "Invalid zipcode: must not be longer than 5 characters.")
     private String zipcode;
 
-    private Item item;
+    private ItemViewModel item;
 
     @NotBlank(message = "Invalid itemType: cannot be empty or blank.")
     @Size(max = 20, message = "Invalid itemType: must not be longer than 20 characters.")
-    @Pattern(regexp = ItemType.patternCaseSensitive, message = "{invalid.itemType}")
     private String itemType;
 
     @NotNull
@@ -115,12 +114,12 @@ public class PurchaseViewModel {
         this.zipcode = zipcode;
     }
 
-    public Item getItem() {
-        return item;
+    public void setItem(ItemViewModel item) {
+        this.item = item;
     }
 
-    public void setItem(Item item) {
-        this.item = item;
+    public ItemViewModel getItem() {
+        return item;
     }
 
     public String getItemType() {

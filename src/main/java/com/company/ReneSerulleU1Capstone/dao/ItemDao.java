@@ -4,6 +4,10 @@ import com.company.ReneSerulleU1Capstone.model.Item;
 
 import java.util.List;
 
+/**
+ * Base interface for Items Data Access object
+ * @param <T>: T is a generic class representing the DTO
+ */
 public interface ItemDao<T> {
     T add(T t);
     T find(Long id);

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.naming.ServiceUnavailableException;
 import javax.validation.ConstraintViolationException;
@@ -191,5 +192,12 @@ public class ControllerExceptionHandler {
         return responseEntity;
     }
 
-
+    @ExceptionHandler(value = {NoHandlerFoundException.class})
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<VndErrors> instantiationException(
+            NoHandlerFoundException e, WebRequest request) {
+        VndErrors error = new VndErrors(request.toString(), e.getMessage());
+        ResponseEntity<VndErrors> responseEntity = new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+        return responseEntity;
+    }
 }

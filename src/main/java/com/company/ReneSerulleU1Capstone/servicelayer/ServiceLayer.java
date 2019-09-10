@@ -18,6 +18,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
+/**
+ * Primary Service Layer for the Capstone Game Store.
+ * This layer contains methods related to customer actions.
+ */
 @Controller @Primary
 public class ServiceLayer {
 
@@ -28,6 +32,12 @@ public class ServiceLayer {
     protected SalesTaxRateDao salesTaxRateDao;
     protected InvoiceDao invoiceDao;
 
+    /**
+     * This bean is a map of the full state name (key) and it's corresponding 2-letter state code (value).
+     * It is instantiated in the Main Class and use to allow additional values when a user submits an invoice.
+     *
+     * @see #validateAttributeValues(PurchaseViewModel, String, Item, SalesTaxRate, ProcessingFee)
+     */
     @Autowired
     Map<String, String> states;
 
@@ -43,6 +53,23 @@ public class ServiceLayer {
         this.invoiceDao = invoiceDao;
     }
 
+    /**
+     * Method checks that the item is an instance of a class that implements {@link ItemViewModel}, maps the item to an
+     *      object of it's respective DTO using {@link MapProperties} ({@link #convertItemViewModelToDto(ItemViewModel)}),
+     *      and then calls the helper {@link #update(Item)}
+     *      method.
+     * @param item: An object that implements ItemViewModel, such as ConsoleViewModel
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     * @throws InstantiationException: {@link MapProperties}, {@link #convertItemViewModelToDto(ItemViewModel)}
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #convertItemViewModelToDto(ItemViewModel)}
+     *
+     * @see #update(Item)
+     * @see InventoryServiceLayer#update(List)
+     * @see ItemViewModel
+     * @see ConsoleViewModel
+     * @see GameViewModel
+     * @see TShirtViewModel
+     */
     @Transactional
     public void update(ItemViewModel item) throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
         if (item instanceof GameViewModel) {
@@ -53,7 +80,7 @@ public class ServiceLayer {
             if (gameDao.countId(game.getGameId()) == 0) {
                 throw new IllegalArgumentException("Invalid:gameId does not exist in the database.");
             }
-            update(convertItemVmToDto(game));
+            update(convertItemViewModelToDto(game));
         } else if (item instanceof ConsoleViewModel) {
             ConsoleViewModel console = (ConsoleViewModel) item;
             if (console.getConsoleId() == null) {
@@ -62,7 +89,7 @@ public class ServiceLayer {
             if (consoleDao.countId(console.getConsoleId()) == 0) {
                 throw new IllegalArgumentException("Invalid:consoleId does not exist in the database.");
             }
-            update(convertItemVmToDto(console));
+            update(convertItemViewModelToDto(console));
         } else if (item instanceof TShirtViewModel) {
             TShirtViewModel tShirt = (TShirtViewModel) item;
             if (tShirt.gettShirtId() == null) {
@@ -71,12 +98,22 @@ public class ServiceLayer {
             if (tShirtDao.countId(tShirt.gettShirtId()) == 0) {
                 throw new IllegalArgumentException("Invalid:tShirtId does not exist in the database.");
             }
-            update(convertItemVmToDto(tShirt));
+            update(convertItemViewModelToDto(tShirt));
         } else {
             throw invalidTypeIdException(item.getClass().getTypeName());
         }
     }
 
+    /**
+     * Method accepts an {@link Item} object that is an instance of one of its inherited classes,
+     *      and execute the respective DAO update method on the object.
+     * @param item: object that inherits {@link Item}
+     * @throws InvalidTypeIdException: Thrown when the object is not an instance of a Class that is implemented
+     *      within the method. See {@link #invalidTypeIdException(String)}
+     * @see ConsoleDao
+     * @see GameDao
+     * @see TShirtDao
+     */
     @Transactional
     protected void update(Item item) throws InvalidTypeIdException {
         if (item instanceof Game) {
@@ -90,14 +127,42 @@ public class ServiceLayer {
         }
     }
 
+    /**
+     * Method finds a DTO object of the given itemType and id. It calls its helper method
+     *      {@link #findItem(String, Long)}. The helper method returns an object that inherits {@link Item}.
+     *      This method uses {@link #convertDtoToItemViewModel(Item)} to convert the Item and return the respective
+     *      object that implements ItemViewModel.
+     * @param itemType: user entered value that must match the productType in the available
+     *                ProcessingFees. Must match the pattern {@link ItemType#patternCaseSensitive}.
+     * @param id: the id (primary key) of the object to search for.
+     *
+     * @return returns an object that implements {@link ItemViewModel}
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #convertDtoToItemViewModel(Item)}
+     * @throws InstantiationException: {@link MapProperties}, {@link #convertDtoToItemViewModel(Item)}
+     *
+     * @see ConsoleViewModel
+     * @see GameViewModel
+     * @see TShirtViewModel
+     */
     public ItemViewModel findItem(String itemType, Long id)
             throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
         Item item = find(itemType, id);
         if (item == null) throw new NoSuchElementException(String.format(
                 "Item of type %s with id %s not found.", itemType, id));
-        return convertDtoToItemVM(item);
+        return convertDtoToItemViewModel(item);
     }
 
+    /**
+     * Method finds a DTO object of the given itemType and id. It call the respective DAO find-by-id method to
+     *      return an object the inherits {@link Item}.
+     * @param itemType: user entered value that must match the productType in the available
+     *                ProcessingFees. Must match the pattern {@link ItemType#patternCaseSensitive}.
+     * @param id: the id (primary key) of the object to search for.
+     *
+     * @return returns an object that inherits {@link Item}
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     */
     public Item find(String itemType, Long id)
             throws InvalidTypeIdException {
         switch (itemType) {
@@ -112,23 +177,35 @@ public class ServiceLayer {
         }
     }
 
+    /**
+     * Returns a {@link List} of {@link ItemViewModel} of the specified itemType, which must adhere to one of the
+     *      values defined in {@link ItemType}. The methods calls the respective DAO findAll() method.
+     *      The DAO returns a list of objects that inherit from {@link Item}.
+     *      This method then uses {@link #convertListDtoToItemViewModel(List)} to convert the list based on the object's class.
+     * @param itemType: user entered value that must match the productType in the available
+     *                ProcessingFees. Must match the pattern {@link ItemType#patternCaseSensitive}.
+     * @return list of object that implement {@link ItemViewModel}
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     * @throws InstantiationException: {@link MapProperties}, {@link #convertListDtoToItemViewModel(List)}
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #convertListDtoToItemViewModel(List)}
+     */
     public List<ItemViewModel> findAll(String itemType)
             throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
         List<ItemViewModel> output = new ArrayList<>();
         switch (itemType) {
             case ItemType.game: {
                 List<Game> games = gameDao.findAll();
-                output.addAll(convertListDtoToItemVM(games));
+                output.addAll(convertListDtoToItemViewModel(games));
                 break;
             }
             case ItemType.console: {
                 List<Console> consoles = consoleDao.findAll();
-                output.addAll(convertListDtoToItemVM(consoles));
+                output.addAll(convertListDtoToItemViewModel(consoles));
                 break;
             }
             case ItemType.tShirt: {
                 List<TShirt> tShirts = tShirtDao.findAll();
-                output.addAll(convertListDtoToItemVM(tShirts));
+                output.addAll(convertListDtoToItemViewModel(tShirts));
                 break;
             }
             default:
@@ -137,6 +214,24 @@ public class ServiceLayer {
         return output;
     }
 
+    /**
+     *Returns a {@link List} of {@link ItemViewModel} of the specified itemType.
+     *      The methods calls the respective DAO findAllBy...(value) method.
+     *      The DAO returns a list of objects that inherit from {@link Item}.
+     *      This method then uses {@link #convertListDtoToItemViewModel(List)} to convert the list based on the object's class.
+     * @param itemType: user entered value that must match the productType in the available
+     *                ProcessingFees. Must match the pattern {@link ItemType#patternCaseSensitive}.
+     * @param attribute: a column name variable of the respective DTO object. These attributes must be any defined in
+     *                 {@link com.company.ReneSerulleU1Capstone.servicelayer.BLSettings.DTO_SEARCHABLE_ATTRIBUTES},
+     *                 and must be a valid attribute of the specified itemType.
+     * @param value: the value to search for
+     * @return list of object that implement {@link ItemViewModel}
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     * @throws InstantiationException: {@link MapProperties}, {@link #convertListDtoToItemViewModel(List)}
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #convertListDtoToItemViewModel(List)}
+     * @throws IllegalArgumentException: Thrown if an invalid attribute name is provided. The error will output a
+     *      list of accepted attributes for the given itemType. {@link #illegalArgumentException(String, List)}
+     */
     public List<ItemViewModel> findBy(String itemType, String attribute, String value)
             throws InvalidTypeIdException, InstantiationException, IllegalAccessException {
         List<ItemViewModel> output = new ArrayList<>();
@@ -145,7 +240,7 @@ public class ServiceLayer {
                 switch (attribute.toLowerCase().trim()) {
                     case "studio": {
                         List<Game> games = gameDao.findAllByStudio(value);
-                        output.addAll(convertListDtoToItemVM(games));
+                        output.addAll(convertListDtoToItemViewModel(games));
                         break;
                     }
                     case "esrbrating":
@@ -154,12 +249,12 @@ public class ServiceLayer {
                     case "esrb-rating":
                     case "esrb+rating": {
                         List<Game> games = gameDao.findAllByEsrbRating(value);
-                        output.addAll(convertListDtoToItemVM(games));
+                        output.addAll(convertListDtoToItemViewModel(games));
                         break;
                     }
                     case "title": {
                         List<Game> games = gameDao.findAllByTitle(value);
-                        output.addAll(convertListDtoToItemVM(games));
+                        output.addAll(convertListDtoToItemViewModel(games));
                         break;
                     }
                     default:
@@ -170,7 +265,7 @@ public class ServiceLayer {
                 switch (attribute.toLowerCase().trim()) {
                     case "manufacturer": {
                         List<Console> consoles = consoleDao.findAllByManufacturer(value);
-                        output.addAll(convertListDtoToItemVM(consoles));
+                        output.addAll(convertListDtoToItemViewModel(consoles));
                         break;
                     }
                     default:
@@ -181,12 +276,12 @@ public class ServiceLayer {
                 switch (attribute.toLowerCase().trim()) {
                     case "color": {
                         List<TShirt> tShirts = tShirtDao.findAllByColor(value);
-                        output.addAll(convertListDtoToItemVM(tShirts));
+                        output.addAll(convertListDtoToItemViewModel(tShirts));
                         break;
                     }
                     case "size": {
                         List<TShirt> tShirts = tShirtDao.findAllBySize(value);
-                        output.addAll(convertListDtoToItemVM(tShirts));
+                        output.addAll(convertListDtoToItemViewModel(tShirts));
                         break;
                     }
                     default:
@@ -199,6 +294,13 @@ public class ServiceLayer {
         return output;
     }
 
+    /**
+     * Method returns a {@link List} of searchable attributes (or column names) for the given itemType.
+     * @param itemType: user entered value that must match the productType in the available
+     *                ProcessingFees. Must match the pattern {@link ItemType#patternCaseSensitive}.
+     * @return list of accepted attribute names for the given itemType.
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     */
     public List<String> findSearchableAttributes(String itemType) throws InvalidTypeIdException {
         switch (itemType) {
             case ItemType.game:
@@ -212,21 +314,52 @@ public class ServiceLayer {
         }
     }
 
+    /**
+     * Method returns all tuples from a table. The method uses the className of the ViewModel to decided which
+     *      table to access and DAO findAll() method to invoke.
+     *      The DAO return a List of the respective DTO class.
+     *      The method then uses {@link #convertListDtoToPurchaseFeeViewModel(List)} to convert the List.
+     * @param className: The className of an accepted ViewModel class.
+     * @return list of ViewModel objects
+     * @throws InvalidClassException: Thrown if a Class that's not processable is provided. The error outputs
+     *      a list of accepted classes. {@link #invalidClassException(Class, Class[])}
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     * @throws InstantiationException: {@link MapProperties}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     *
+     * @see PurchaseViewModel
+     * @see SalesTaxRate
+     */
     public List<?> findAll(Class className)
             throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
-        List<PurchaseFee> output = new ArrayList<>();
+        List<PurchaseFeeViewModel> output = new ArrayList<>();
         if (className.equals(ProcessingFeeViewModel.class)) {
             List<ProcessingFee> processingFees = processingFeeDao.findAll();
-            output.addAll(convertListDtoToPurchaseFee(processingFees));
+            output.addAll(convertListDtoToPurchaseFeeViewModel(processingFees));
         } else if (className.equals(SalesTaxRateViewModel.class)) {
             List<SalesTaxRate> salesTaxRates = salesTaxRateDao.findAll();
-            output.addAll(convertListDtoToPurchaseFee(salesTaxRates));
+            output.addAll(convertListDtoToPurchaseFeeViewModel(salesTaxRates));
         } else {
             throw invalidClassException(className, ProcessingFeeViewModel.class, SalesTaxRateViewModel.class);
         }
         return output;
     }
 
+    /**
+     * This method is used to provide a list of {@link ProcessingFee} or {@link SalesTaxRate} as a map.
+     *      It uses {@link #findAll(Class)} to get the list, and then is populates the map object.
+     * @param className: a ViewModel class name.
+     * @return Map with key of type String and value of type Decimal
+     * @throws InvalidClassException: Thrown if a Class that's not processable is provided. The error outputs
+     *      a list of accepted classes. {@link #invalidClassException(Class, Class[])}
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #findAll(Class)}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     * @throws InvalidTypeIdException: {@link #invalidTypeIdException(String)}
+     * @throws InstantiationException: {@link MapProperties}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     * @throws HttpServerErrorException: thrown if the provided className is null.
+     *
+     * @see ProcessingFeeViewModel
+     * @see SalesTaxRate
+     */
     public Map<String, BigDecimal> findAllAsMap(Class className)
             throws InvalidClassException, IllegalAccessException, InvalidTypeIdException, InstantiationException {
         List<?> list = findAll(className);
@@ -250,6 +383,15 @@ public class ServiceLayer {
         return map;
     }
 
+    /**
+     * Method finds and lists all available products types defined in the ProcessingFee table of the data layer.
+     * @return list of String comprised of the products types defined in the ProcessingFee table of the data layer.
+     * @throws InvalidClassException: Thrown if a Class that's not processable is provided. The error outputs
+     *      a list of accepted classes. {@link #invalidClassException(Class, Class[])}
+     * @throws InstantiationException: {@link MapProperties}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     * @throws InvalidTypeIdException: {@link MapProperties}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #findAll(Class)}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     */
     public List<String> findAllProductTypes()
             throws InvalidClassException, InstantiationException, InvalidTypeIdException, IllegalAccessException {
         List<String> productTypes = new ArrayList<>();
@@ -261,7 +403,17 @@ public class ServiceLayer {
         return productTypes;
     }
 
-    public PurchaseViewModel find(Class className, Long id) throws InvalidTypeIdException, InvalidClassException {
+    /**
+     * Method finds an invoice with specified id and builds an object of type className.
+     * @param className: a ViewModel class name.
+     * @param id: the id (primary key) to search for
+     * @return {@link PurchaseViewModel} a composite object of {@link Invoice} parameters and {@link Item} object
+     * @throws InvalidTypeIdException: {@link MapProperties}, {@link #convertListDtoToPurchaseFeeViewModel(List)}
+     * @throws InvalidClassException: Thrown if a Class that's not processable is provided. The error outputs
+     *      a list of accepted classes. {@link #invalidClassException(Class, Class[])}
+     */
+    public PurchaseViewModel find(Class className, Long id)
+            throws InvalidTypeIdException, InvalidClassException, InstantiationException, IllegalAccessException {
         if (className.equals(PurchaseViewModel.class)) {
             Invoice invoice = invoiceDao.find(id);
             if (invoice == null)
@@ -271,11 +423,35 @@ public class ServiceLayer {
         throw invalidClassException(className, PurchaseViewModel.class);
     }
 
+    /**
+     * Method un-packages a PurchaseViewModel, validates the user entered data based on the Business Logic,
+     *      calculates the Invoice missing fields, and if valid saves it to the database. The method also updates
+     *      the quantity of the specified {@link Item} accordingly.
+     * @param pvm: {@link PurchaseViewModel} that is provided from the user in order to add a new invoice to the DB.
+     * @return returns the same PurchaseViewModel object with the calculated fields and the new invoice id.
+     * @throws InvalidTypeIdException: {@link MapProperties}, {@link #convertDtoToItemViewModel(Item)}
+     * @throws InvalidAttributeValueException: thrown if one of the specified attribute values, or calculated
+     *      properties violates the Business Logic
+     * @throws ServiceUnavailableException: thrown when the user provides a stateCode value with more than two
+     *      characters and the service is not available to compare this value to the list of state names.
+     * @throws IllegalAccessException: {@link MapProperties}, {@link #findAll(Class)}, {@link #convertDtoToItemViewModel(Item)}
+     * @throws InstantiationException: {@link MapProperties}, {@link #findAll(Class)}, {@link #convertDtoToItemViewModel(Item)}
+     * @throws NoSuchElementException
+     *
+     * Helper Methods
+     * @see #setCalculatedAttributes(PurchaseViewModel, Item, SalesTaxRate, ProcessingFee)
+     * @see #validateAttributeValues(PurchaseViewModel, String, Item, SalesTaxRate, ProcessingFee)
+     * @see BLSettings
+     */
     @Transactional
     public PurchaseViewModel add(PurchaseViewModel pvm)
             throws InvalidTypeIdException, InvalidAttributeValueException, ServiceUnavailableException,
             IllegalAccessException, InstantiationException {
         String itemType = pvm.getItemType();
+        if (!itemType.matches(ItemType.patternCaseSensitive)) {
+            throw new InvalidTypeIdException(null, String.format("Invalid itemType. Must adhere to %s",
+                    ItemType.patternCaseSensitive), null, "itemType");
+        }
         Item item = find(itemType, pvm.getItemId());
 
         if (item == null) throw new NoSuchElementException(
@@ -312,11 +488,24 @@ public class ServiceLayer {
         invoice = invoiceDao.add(invoice);
 
         pvm.setInvoiceId(invoice.getInvoiceId());
-        pvm.setItem(item);
+        pvm.setItem(convertDtoToItemViewModel(item));
 
         return pvm;
     }
 
+    /**
+     * This is a helper method that sets the calculated fields of {@link Invoice}:
+     *      unitPrice, subTotal, tax, fee, and total.
+     *      Method also checks that the Total purchase amount is not greater than the max allowable amount by the DB.
+     * @param pvm: {@link PurchaseViewModel} object with parameters to be validated and set
+     * @param item: the {@link Item} object respective to the itemId specified in the pvm
+     * @param salesTaxRate: the {@link SalesTaxRate} object for the specified state in the pvm
+     * @param processingFee: the {@link ProcessingFee} object for the specified itemType (productType) in the
+     * @throws InvalidAttributeValueException: thrown if one of the specified attribute values, or calculated
+     *      properties violates the Business Logic.
+     *
+     * @see BLSettings
+     */
     protected void setCalculatedAttributes(PurchaseViewModel pvm, Item item, SalesTaxRate salesTaxRate,
                                         ProcessingFee processingFee) throws InvalidAttributeValueException {
         BigDecimal unitPrice = item.getPrice();
@@ -342,6 +531,29 @@ public class ServiceLayer {
         pvm.setTotal(total);
     }
 
+    /**
+     * This helper method validates the {@link PurchaseViewModel} object parameters to ensure these comply with
+     *      the Business Logic. Checks:
+     *         1) Order quantity is greater than 0
+     *         2) Order quantity is less than or equal to the Item's remaining quantity
+     *         3) Order must contain a valid state code. This Service Layer allows for the user to pass the full
+     *              state name, which it then maps to the stateCode using a bean loaded from a JSON file. If the
+     *              JSON file fails to load, the logic reverts to the base requirement.
+     * @param pvm: {@link PurchaseViewModel} object with parameters to be validated and set
+     * @param itemType: user entered value that must match the productType in the available
+     *                ProcessingFees. Must match the pattern {@link ItemType#patternCaseSensitive}.
+     * @param item: the {@link Item} object respective to the itemId specified in the pvm
+     * @param salesTaxRate: instantiated {@link SalesTaxRate} object whose values will be set as validation rules are
+     *                   passed
+     * @param processingFee: instantiated {@link ProcessingFee} object whose values will be set as validation rules
+     *                     are passed
+     * @throws ServiceUnavailableException: Thrown if the user provided a stateCode greater than 2 characters and
+     *      the JSON state name to code isn't available.
+     * @throws IllegalArgumentException: Thrown is business logic (#1 & #2) fails.
+     * @throws NoSuchElementException: thrown is state name, or stateCode is not found
+     * @throws HttpServerErrorException: by this method, the itemType is validated. This error is thrown if the
+     *      ProcessingFee DAO doesn't return an object for itemType.
+     */
     protected void validateAttributeValues(PurchaseViewModel pvm, String itemType, Item item,
                                         SalesTaxRate salesTaxRate, ProcessingFee processingFee)
             throws ServiceUnavailableException {
@@ -408,7 +620,16 @@ public class ServiceLayer {
         processingFee.setFee(pf.getFee());
     }
 
-    protected PurchaseViewModel buildHelper(Invoice invoice) throws InvalidTypeIdException {
+    /**
+     * Helper method to build a PurchaseViewModel when an invoice is found
+     * @param invoice
+     * @return
+     * @throws InvalidTypeIdException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
+     */
+    protected PurchaseViewModel buildHelper(Invoice invoice)
+            throws InvalidTypeIdException, IllegalAccessException, InstantiationException {
         PurchaseViewModel pvm = new PurchaseViewModel();
         pvm.setInvoiceId(invoice.getInvoiceId());
         pvm.setName(invoice.getName());
@@ -427,13 +648,13 @@ public class ServiceLayer {
 
         switch (invoice.getItemType()) {
             case ItemType.game:
-                pvm.setItem(gameDao.find(invoice.getItemId()));
+                pvm.setItem(convertDtoToItemViewModel(gameDao.find(invoice.getItemId())));
                 break;
             case ItemType.console:
-                pvm.setItem(consoleDao.find(invoice.getItemId()));
+                pvm.setItem(convertDtoToItemViewModel(consoleDao.find(invoice.getItemId())));
                 break;
             case ItemType.tShirt:
-                pvm.setItem(tShirtDao.find(invoice.getItemId()));
+                pvm.setItem(convertDtoToItemViewModel(tShirtDao.find(invoice.getItemId())));
                 break;
             default:
                 throw invalidTypeIdException(invoice.getItemType());
@@ -442,18 +663,39 @@ public class ServiceLayer {
         return pvm;
     }
 
-    protected List<ItemViewModel> convertListDtoToItemVM(List<?> list)
+    /**
+     * Method converts a list of DTO objects to a list of ItemViewModel objects using
+     * @param list
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvalidTypeIdException
+     *
+     * @see MapProperties
+     * @see #convertDtoToItemViewModel(Item)
+     */
+    protected List<ItemViewModel> convertListDtoToItemViewModel(List<?> list)
             throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
         List<ItemViewModel> output = new ArrayList<>();
         if (list.isEmpty()) return output;
 
         for (Object o : list) {
-            output.add(convertDtoToItemVM((Item) o));
+            output.add(convertDtoToItemViewModel((Item) o));
         }
         return output;
     }
 
-    protected ItemViewModel convertDtoToItemVM(Item item)
+    /**
+     * Method converts an Item DTO object (i.e. Game, Console, TShirt) to its respective ItemViewModel.
+     * @param item: object of type {@link Item}
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvalidTypeIdException
+     *
+     * @see MapProperties
+     */
+    protected ItemViewModel convertDtoToItemViewModel(Item item)
             throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
         Class className = item.getClass().getSimpleName().isEmpty() ? item.getClass().getSuperclass() : item.getClass();
         if (className == Game.class) {
@@ -472,7 +714,18 @@ public class ServiceLayer {
         }
     }
 
-    protected Item convertItemVmToDto(ItemViewModel item)
+    /**
+     * Method converts an {@link ItemViewModel} object to its respective {@link Item} DTO
+     *      object (i.e. Game, Console, TShirt)
+     * @param item: object of type {@link ItemViewModel}
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvalidTypeIdException
+     *
+     * @see MapProperties
+     */
+    protected Item convertItemViewModelToDto(ItemViewModel item)
             throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
         Class className = item.getClass();
         if (className == GameViewModel.class) {
@@ -491,18 +744,39 @@ public class ServiceLayer {
         }
     }
 
-    protected List<PurchaseFee> convertListDtoToPurchaseFee(List<?> list)
+    /**
+     * Method converts a list of Fee related DTO objects to the respective
+     *      list of {@link PurchaseFeeViewModel} ViewModel Objects.
+     * @param list: list of fee related object (i.e. {@link ProcessingFee}, {@link SalesTaxRate})
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvalidTypeIdException
+     *
+     * @see MapProperties
+     */
+    protected List<PurchaseFeeViewModel> convertListDtoToPurchaseFeeViewModel(List<?> list)
             throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
-        List<PurchaseFee> output = new ArrayList<>();
+        List<PurchaseFeeViewModel> output = new ArrayList<>();
         if (list.isEmpty()) return output;
 
         for (Object o : list) {
-            output.add(convertDtoToPurchaseFee(o));
+            output.add(convertDtoToPurchaseFeeViewModel(o));
         }
         return output;
     }
 
-    protected PurchaseFee convertDtoToPurchaseFee(Object o)
+    /**
+     * Method converts a fee related DTO object to the respective {@link PurchaseFeeViewModel} ViewModel object.
+     * @param o: fee related object (i.e. {@link ProcessingFee}, {@link SalesTaxRate})
+     * @return
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     * @throws InvalidTypeIdException
+     *
+     * @see MapProperties
+     */
+    protected PurchaseFeeViewModel convertDtoToPurchaseFeeViewModel(Object o)
             throws InstantiationException, IllegalAccessException, InvalidTypeIdException {
         Class className = o.getClass().getSimpleName().isEmpty() ? o.getClass().getSuperclass() : o.getClass();
         if (className == ProcessingFee.class) {

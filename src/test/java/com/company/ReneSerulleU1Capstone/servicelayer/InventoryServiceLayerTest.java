@@ -182,7 +182,7 @@ public class InventoryServiceLayerTest {
         s1.setRate(new BigDecimal(0.05).setScale(2, RoundingMode.HALF_UP));
         sl.add(SalesTaxRateViewModel.class, s1);
 
-        PurchaseFee str1 = sl.find(SalesTaxRateViewModel.class, "NY");
+        PurchaseFeeViewModel str1 = sl.find(SalesTaxRateViewModel.class, "NY");
         assertEquals(str1, s1);
 
         s1 = new SalesTaxRateViewModel();
@@ -221,7 +221,7 @@ public class InventoryServiceLayerTest {
         p1.setFee(new BigDecimal(14.99).setScale(2, RoundingMode.HALF_UP));
         sl.add(ProcessingFeeViewModel.class, p1);
 
-        PurchaseFee p2 = sl.find(ProcessingFeeViewModel.class, "Consoles");
+        PurchaseFeeViewModel p2 = sl.find(ProcessingFeeViewModel.class, "Consoles");
         assertEquals(p2, p1);
 
         p1.setProductType("T-Shirts");
